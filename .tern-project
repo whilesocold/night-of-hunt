@@ -1,0 +1,21 @@
+{
+  "ecmaVersion": "8",
+  "libs": [
+    "underscore",
+    "pixi.js"
+  ],
+  "loadEagerly": [
+    "src"
+  ],
+  "dontLoad": [
+  ],
+  "plugins": {
+    "doc_comment": true,
+    "modules": {
+      "dontLoad": "",
+      "load": "",
+      "modules": ""
+    },
+    "es_modules": {}
+  }
+}
