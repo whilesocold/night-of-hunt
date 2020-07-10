@@ -3,16 +3,19 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier/@typescript-eslint",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:react/recommended"
   ],
   "plugins": [
     "@typescript-eslint",
     "prettier",
-    "eslint-plugin-babel"
+    "eslint-plugin-babel",
+    "react"
   ],
   "env": {
     "es6": true,
-    "browser": true
+    "browser": true,
+    "node": false
   },
   "rules": {
     "@typescript-eslint/explicit-function-return-type": "off",

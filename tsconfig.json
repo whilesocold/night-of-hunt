@@ -10,7 +10,8 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "allowJs": true,
-    "noEmit": true
+    "noEmit": true,
+    "jsx": "react"
   },
   "include": [
     "src/**/*"
