@@ -17,6 +17,8 @@ export class App extends EventEmitter {
   private canvas: HTMLCanvasElement
   private app: PIXI.Application
 
+  private width: number
+
   private resourceManager: ResourceManager
 
   constructor() {
@@ -41,15 +43,17 @@ export class App extends EventEmitter {
 
     await this.loadResources(ResourcesConfig)
 
+    this.width = 460
+
     this.canvas = document.getElementById('canvas') as HTMLCanvasElement
     this.app = new PIXI.Application({
       backgroundColor: 0x000000,
       view: this.canvas,
-      width: 460,
+      width: this.width,
       height: 800,
       resizeTo: window,
     })
 
-    render(<Root/>, this.app.stage)
+    render(<Root width={this.width} app={this.app}/>, this.app.stage)
   }
 }

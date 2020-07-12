@@ -29,7 +29,7 @@ export class ResourceManager extends EventEmitter {
     if (url.includes('.png') || url.includes('.jpg') || url.includes('.json')) {
       this.textureManager.add(key, url)
 
-    } else if (url.includes('-fnt')) {
+    } else if (url.includes('.ttf')) {
       this.fontManager.add(key)
     }
   }

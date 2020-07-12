@@ -41,7 +41,7 @@ export class FontManager extends EventEmitter {
         custom: {
           families: this.families,
         },
-        inactive: () => {
+        inactive: (e) => {
           this.emit(FontManagerEvent.Error)
         },
         active: () => {
