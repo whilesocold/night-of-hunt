@@ -9,9 +9,9 @@ import { BattleHealthbar } from './BattleHealthbar'
 
 export class BattleHeader extends Component<any, any> {
   render() {
-    const { bossTexture, response } = this.props
+    const { x, y, bossTexture, response } = this.props
 
-    const backTexture = ResourceManager.instance.getTexture('back.jpg')
+    const backTexture = ResourceManager.instance.getTexture('back3.jpg')
 
     const bossName = response.enemy.name2
     const bossHealth = response.enemy.currentHealth
@@ -21,7 +21,7 @@ export class BattleHeader extends Component<any, any> {
     const userHealth = response.user.currentHealth
     const userHealthProgress = response.user.currentHealthPercent
 
-    return <Container>
+    return <Container x={x} y={y}>
       <Sprite anchor={{ x: 0, y: 0 }} texture={backTexture}/>
       <Sprite x={backTexture.width / 2}
               y={backTexture.height}

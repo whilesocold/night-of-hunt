@@ -1,5 +1,16 @@
 import EventEmitter from 'eventemitter3'
 
+interface RequestOptions {
+  command: string
+  user: any
+  enemy: any
+}
+
+interface RequestAttackOptions extends RequestOptions {
+  card: number
+  reward: any
+}
+
 export class RequestManager extends EventEmitter {
   protected socket: WebSocket
 
@@ -38,5 +49,11 @@ export class RequestManager extends EventEmitter {
         console.log(`[error] ${e.message}`)
       }
     })
+  }
+
+  public async request(options: RequestOptions): Promise<void> {
+    this.socket.send(JSON.stringify(options))
+
+    return Promise.resolve()
   }
 }
