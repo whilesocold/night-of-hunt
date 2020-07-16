@@ -3,7 +3,7 @@ import { Rectangle } from '../Rectangle'
 import { Container } from 'react-pixi-fiber'
 import { Utils } from '../../utils/Utils'
 
-export class FightHealthbar extends Component<any, any> {
+export class BattleHealthbar extends Component<any, any> {
   render() {
     let { x, y, width, progress } = this.props
 

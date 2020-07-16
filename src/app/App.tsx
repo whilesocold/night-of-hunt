@@ -6,6 +6,8 @@ import { render } from 'react-pixi-fiber'
 import { Root } from './components/Root'
 import { ResourceManager, ResourceManagerEvent } from './utils/resources/ResourceManager'
 import { ResourcesConfig } from './Resources'
+import { RequestManager } from './utils/RequestManager'
+import { DataStorage } from './utils/DataStorage'
 
 interface AppInitOptions {
   debugMode?: boolean
@@ -20,6 +22,9 @@ export class App extends EventEmitter {
   private width: number
 
   private resourceManager: ResourceManager
+  private requestManager: RequestManager
+
+  private storage: DataStorage
 
   constructor() {
     super()
@@ -27,7 +32,22 @@ export class App extends EventEmitter {
     App.instance = this
   }
 
-  public async loadResources(config: any): Promise<void> {
+  private initStorage(): Promise<void> {
+    const urlParams = new URLSearchParams(window.location.search)
+    const bossId = urlParams.has('bossId') ? urlParams.get('bossId') : 12
+    const sessionId = urlParams.has('sessionId') ? urlParams.get('sessionId') : 'node0y83vqbsk259wy1urugzobjz0323.node0'
+
+    this.storage = new DataStorage()
+    this.storage.set({
+      bossId: bossId,
+      sessionId: sessionId,
+      response: {},
+    })
+
+    return Promise.resolve()
+  }
+
+  private async loadResources(config: any): Promise<void> {
     return new Promise(resolve => {
       console.log('App::loadResources() -', config)
 
@@ -38,10 +58,25 @@ export class App extends EventEmitter {
     })
   }
 
+  private async connectToServer(url: string): Promise<void> {
+    return new Promise(async resolve => {
+      this.requestManager = new RequestManager()
+      this.requestManager.once('init', response => {
+        this.storage.set('response', response)
+
+        resolve()
+      })
+
+      await this.requestManager.connect(url)
+    })
+  }
+
   public async init(props: AppInitOptions = { debugMode: false }): Promise<void> {
     console.log('App::init() -', props)
 
+    await this.initStorage()
     await this.loadResources(ResourcesConfig)
+    await this.connectToServer('wss://ohota.mobi/ws/fightBoss?bossId=' + this.storage.get('bossId') + '&jsessionid=' + this.storage.get('sessionId'))
 
     this.width = 460
 
@@ -54,6 +89,7 @@ export class App extends EventEmitter {
       resizeTo: window,
     })
 
-    render(<Root width={this.width} app={this.app}/>, this.app.stage)
+    render(<Root width={this.width} bossId={this.storage.get('bossId')} response={this.storage.get('response')}
+                 app={this.app}/>, this.app.stage)
   }
 }

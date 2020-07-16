@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Text } from 'react-pixi-fiber'
 
-export class FightAvatarName extends Component<any, any> {
+export class BattleUserName extends Component<any, any> {
   render() {
     let { anchor, x, y, text, color } = this.props
 

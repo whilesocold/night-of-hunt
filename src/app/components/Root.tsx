@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Container, Sprite } from 'react-pixi-fiber'
-import { FightHeader } from './fight/FightHeader'
+import { BattleHeader } from './battle/BattleHeader'
 import { ResourceManager } from '../utils/resources/ResourceManager'
 
 export class Root extends Component<any, any> {
@@ -21,15 +21,15 @@ export class Root extends Component<any, any> {
   }
 
   render() {
-    const { width } = this.props
+    const { width, bossId, response } = this.props
 
     const bgTexture = ResourceManager.instance.getTexture('bg.jpg')
-    const bossTexture = ResourceManager.instance.getTexture('boss12.png')
+    const bossTexture = ResourceManager.instance.getTexture('boss' + bossId + '.png')
 
     return <Container>
       <Sprite texture={bgTexture}/>
       <Container x={(this.state.width - width) / 2} y={0}>
-        <FightHeader bossTexture={bossTexture}/>
+        <BattleHeader response={response} bossTexture={bossTexture}/>
       </Container>
     </Container>
   }

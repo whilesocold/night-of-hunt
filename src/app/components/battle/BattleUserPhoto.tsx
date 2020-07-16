@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Sprite } from 'react-pixi-fiber'
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 
-export class FightAvatar extends Component<any, any> {
+export class BattleUserPhoto extends Component<any, any> {
   render() {
     let { texture, anchor, x, y } = this.props
 
