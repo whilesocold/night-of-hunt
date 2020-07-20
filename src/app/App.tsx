@@ -71,6 +71,28 @@ export class App extends EventEmitter {
     })
   }
 
+  private async onSkillDown(card: number): Promise<void> {
+    console.log(card)
+
+    this.requestManager.once('attack', (data) => {
+      console.log(data)
+      const response = this.storage.get('response')
+
+      response.user = data.user
+      response.enemy = data.enemy
+      response.reward = data.reward
+
+      this.storage.set({
+        response: response
+      })
+    })
+
+    await this.requestManager.request({
+      command: 'attack',
+      card: card,
+    })
+  }
+
   public async init(props: AppInitOptions = { debugMode: false }): Promise<void> {
     console.log('App::init() -', props)
 
@@ -89,7 +111,15 @@ export class App extends EventEmitter {
       resizeTo: window,
     })
 
-    render(<Root width={this.width} bossId={this.storage.get('bossId')} response={this.storage.get('response')}
-                 app={this.app}/>, this.app.stage)
+    render(<Root width={this.width}
+                 bossId={this.storage.get('bossId')}
+                 response={this.storage.get('response')}
+                 app={this.app}
+                 onSkillDown={id => this.onSkillDown(id)}
+    />, this.app.stage)
+  }
+
+  public getStorage(): DataStorage {
+    return this.storage
   }
 }

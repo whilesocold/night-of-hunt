@@ -1,15 +1,46 @@
 import React, { Component } from 'react'
 import { Container, Sprite } from 'react-pixi-fiber'
+
+import { App } from '../../App'
+import { Rectangle } from '../Rectangle'
+
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 import { BattleUserPhoto } from './BattleUserPhoto'
 import { BattleUserName } from './BattleUserName'
-import { Rectangle } from '../Rectangle'
 import { BattleHealth } from './BattleHealth'
 import { BattleHealthbar } from './BattleHealthbar'
 
 export class BattleHeader extends Component<any, any> {
+  private onResponseChangeBind: (changed: any) => void
+
+  constructor(props: any) {
+    super(props)
+
+    this.state = {
+      response: null,
+    }
+
+    this.onResponseChangeBind = this.onResponseChange.bind(this)
+  }
+
+  componentDidMount(): void {
+    App.instance.getStorage().on('change:response', this.onResponseChangeBind)
+  }
+
+  componentWillUnmount(): void {
+    App.instance.getStorage().off('change:response', this.onResponseChangeBind)
+  }
+
+  onResponseChange(e: any): void {
+    this.setState({ response: e.changed.get('response') })
+  }
+
   render() {
-    const { x, y, bossTexture, response } = this.props
+    let { x, y, bossTexture, response } = this.props
+
+    if (this.state.response) {
+      response = this.state.response
+    }
 
     const backTexture = ResourceManager.instance.getTexture('back3.jpg')
 
@@ -39,7 +70,6 @@ export class BattleHeader extends Component<any, any> {
       <BattleHealth x={backTexture.width - 70} y={backTexture.height - 22} color={'#6085ad'}
                     text={userHealth.toString()}/>
       <BattleHealthbar x={39} y={backTexture.height - 9} width={420} progress={userHealthProgress}/>
-
     </Container>
   }
 }

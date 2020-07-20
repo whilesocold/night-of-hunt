@@ -26,6 +26,7 @@ export class DataStorage extends EventEmitter {
       })
 
       Object.keys(keyOrAttributes).forEach(key => {
+        console.log('change:' + key, { changed })
         this.emit('change:' + key, { changed })
       })
     }
