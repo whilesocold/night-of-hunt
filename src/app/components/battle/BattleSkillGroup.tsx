@@ -3,7 +3,7 @@ import { BattleSkill } from './BattleSkill'
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 import { BattleSkillCombo } from './BattleSkillCombo'
 import { Container } from 'react-pixi-fiber'
-import PIXI from "pixi.js"
+import PIXI from 'pixi.js'
 
 export class BattleSkillGroup extends Component<any, any> {
   private getCountSchool(fightDeck: any): number {
@@ -25,17 +25,20 @@ export class BattleSkillGroup extends Component<any, any> {
     return countSchool
   }
 
-  private getGroups(fightDeck: any): Array<any> {
-    const result = []
+  private getGroups(fightDeck: any): any {
+    const result = {}
+
+    console.log(fightDeck)
 
     for (let i = 0; i < fightDeck.length; i++) {
       const fightCard = fightDeck[i]
+      const schoolKey = 'school' + fightCard.school.toString()
 
-      if (!result[fightCard.school]) {
-        result[fightCard.school] = []
+      if (!result[schoolKey]) {
+        result[schoolKey] = []
       }
 
-      result[fightCard.school].push(fightCard)
+      result[schoolKey].push(fightCard)
     }
 
     return result
@@ -78,7 +81,9 @@ export class BattleSkillGroup extends Component<any, any> {
 
     let totalWidth = 0
 
-    skillGroups.forEach((group, index) => {
+    for (const key in skillGroups) {
+      const group = skillGroups[key]
+
       // TODO: combo x3
       if (group.length === 1) {
         totalWidth += (skillTexture.width + margin)
@@ -86,18 +91,21 @@ export class BattleSkillGroup extends Component<any, any> {
       } else {
         totalWidth += (skillTexture.width + margin) * 2
       }
-    })
+    }
 
     let skillX = 0
+    let index = 0
 
-    skillGroups.forEach((group, index) => {
+    for (const key in skillGroups) {
+      const group = skillGroups[key]
+
       // TODO: combo x3
       if (group.length === 1) {
         const data = group[0]
         const skillWidth = skillTexture.width
 
         skills.push(<BattleSkill key={data.id}
-                                 x={skillX - totalWidth/2}
+                                 x={skillX - totalWidth / 2 + skillTexture.width / 2}
                                  y={0}
                                  index={index}
                                  id={data.id}
@@ -119,7 +127,7 @@ export class BattleSkillGroup extends Component<any, any> {
         const skillWidth = skillTexture.width * 2
 
         skills.push(<BattleSkillCombo key={id}
-                                      x={skillX - totalWidth/2}
+                                      x={skillX - totalWidth / 2 + skillTexture.width}
                                       y={0}
                                       index={index}
                                       idA={skillA.id}
@@ -131,7 +139,9 @@ export class BattleSkillGroup extends Component<any, any> {
 
         skillX += skillWidth
       }
-    })
+
+      index++
+    }
 
     return <Container x={x} y={y}>
       {skills}

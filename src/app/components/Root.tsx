@@ -56,17 +56,13 @@ export class Root extends Component<any, any> {
     const reward = response.reward
 
     const hasJournal = journal.length > 0
-    const hasReward = typeof reward !== 'undefined'
+    const hasReward = false//typeof reward !== 'undefined'
 
     const battleContent = hasReward ? null : <Container>
       <BattleHeader x={(this.state.width - width) / 2} y={0} response={response} bossTexture={bossTexture}/>
       <BattleSkillGroup x={this.state.width / 2} y={350} fightDeck={userFightDeck} onSkillDown={onSkillDown}/>
       {hasJournal ? <BattleJournal x={this.state.width / 2} y={420} journal={journal}/> : null}
     </Container>
-
-    if (hasReward) {
-      alert('You reward: ' + JSON.stringify((reward)))
-    }
 
     return <Container>
       <Sprite texture={bgTexture}/>

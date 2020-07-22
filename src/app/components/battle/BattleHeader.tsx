@@ -9,15 +9,19 @@ import { BattleUserPhoto } from './BattleUserPhoto'
 import { BattleUserName } from './BattleUserName'
 import { BattleHealth } from './BattleHealth'
 import { BattleHealthbar } from './BattleHealthbar'
+import { TweenUtils } from '../../utils/TweenUtils'
+import { BattleDamage } from './BattleDamage'
 
 export class BattleHeader extends Component<any, any> {
   private onResponseChangeBind: (changed: any) => void
+  private bossRef: any
 
   constructor(props: any) {
     super(props)
 
     this.state = {
       response: null,
+      showDamage: false,
     }
 
     this.onResponseChangeBind = this.onResponseChange.bind(this)
@@ -32,7 +36,25 @@ export class BattleHeader extends Component<any, any> {
   }
 
   onResponseChange(e: any): void {
-    this.setState({ response: e.changed.get('response') })
+    const state = {
+      response: e.changed.get('response'),
+      showDamage: false,
+    }
+
+    if (this.bossRef) {
+      state.showDamage = true
+
+      TweenUtils.bossAttack(this.bossRef)
+
+      setTimeout(() => {
+        this.setState({
+          response: e.changed.get('response'),
+          showDamage: false,
+        })
+      }, 2 * 1000)
+    }
+
+    this.setState(state)
   }
 
   render() {
@@ -52,11 +74,14 @@ export class BattleHeader extends Component<any, any> {
     const userHealth = response.user.currentHealth
     const userHealthProgress = response.user.currentHealthPercent
 
+    const fightLog = response.user.fightLog[0]
+
     return <Container x={x} y={y}>
       <Sprite anchor={{ x: 0, y: 0 }} texture={backTexture}/>
-      <Sprite x={backTexture.width / 2}
-              y={backTexture.height}
-              anchor={{ x: 0.5, y: 1 }} texture={bossTexture}/>
+      <Sprite ref={div => this.bossRef = div}
+              x={backTexture.width / 2}
+              y={backTexture.height - bossTexture.height / 2 + 20}
+              anchor={{ x: 0.5, y: 0.5 }} texture={bossTexture}/>
 
       <Rectangle width={backTexture.width} height={39} fill={'#000000'} alpha={0.5}/>
       <BattleUserPhoto texture={null}/>
@@ -70,6 +95,12 @@ export class BattleHeader extends Component<any, any> {
       <BattleHealth x={backTexture.width - 70} y={backTexture.height - 22} color={'#6085ad'}
                     text={userHealth.toString()}/>
       <BattleHealthbar x={39} y={backTexture.height - 9} width={420} progress={userHealthProgress}/>
+
+      {this.state.showDamage ? <BattleDamage x={backTexture.width / 2}
+                                             y={backTexture.height / 2}
+                                             damage={fightLog.damage}
+      /> : null}
+
     </Container>
   }
 }

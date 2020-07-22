@@ -2,8 +2,15 @@ import React, { Component } from 'react'
 import { Container, Sprite, Text } from 'react-pixi-fiber'
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 import { App } from '../../App'
+import { TweenMax } from "gsap"
 
 export class BattleJournalItem extends Component<any, any> {
+  private ref: any
+
+  componentDidMount(): void {
+    TweenMax.to(this.ref, 0.35, { alpha: 1 })
+  }
+
   render() {
     const { x, y, userSchool, userDamage, enemySchool, enemyDamage } = this.props
 

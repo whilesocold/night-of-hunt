@@ -117,6 +117,10 @@ const resources = {
   'school_2.png': 'res/images/schools/school_2.png',
   'school_3.png': 'res/images/schools/school_3.png',
 
+  'school_glow_1.png': 'res/images/schools/school_glow_1.png',
+  'school_glow_2.png': 'res/images/schools/school_glow_2.png',
+  'school_glow_3.png': 'res/images/schools/school_glow_3.png',
+
   // Other
   'dig_fight.png': 'res/images/dig_fight.png',
 
