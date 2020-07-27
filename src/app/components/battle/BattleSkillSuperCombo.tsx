@@ -8,7 +8,7 @@ import { Linear, TweenMax } from 'gsap'
 
 export const BattleSkillColor = ['#ffac4b', '#B3E246', '#8fecff']
 
-export class BattleSkillCombo extends Component<any, any> {
+export class BattleSkillSuperCombo extends Component<any, any> {
   private containerRef: any
   private glowRef: any
 
@@ -18,20 +18,21 @@ export class BattleSkillCombo extends Component<any, any> {
 
     TweenMax.to(this.glowRef, 0.8, { alpha: 1, ease: Linear.easeOut })
     TweenMax.to(this.glowRef.scale, 0.8, {
-      x: 1.2, y: 1.2, ease: Linear.easeOut, onComplete: () => {
-        TweenMax.to(this.glowRef.scale, 0.5, { x: 1, y: 1, yoyo: true, repeat: -1, ease: Linear.easeIn })
+      x: 1.7, y: 1.2, ease: Linear.easeOut, onComplete: () => {
+        TweenMax.to(this.glowRef.scale, 0.5, { x: 1.5, y: 1, yoyo: true, repeat: -1, ease: Linear.easeIn })
       },
     })
   }
 
   render() {
-    const { x, y, index, idA, idB, damage, school, onSkillDown } = this.props
+    const { x, y, index, idA, idB, idC, damage, school, onSkillDown } = this.props
 
     const schoolGlowTexture = ResourceManager.instance.getTexture('school_glow_' + school + '.png')
-    const comboTexture = ResourceManager.instance.getTexture('combo.png')
+    const comboTexture = ResourceManager.instance.getTexture('super_combo.png')
 
     const skillATexture = ResourceManager.instance.getTexture('skill_' + idA + '.png') || PIXI.Texture.WHITE
     const skillBTexture = ResourceManager.instance.getTexture('skill_' + idB + '.png') || PIXI.Texture.WHITE
+    const skillCTexture = ResourceManager.instance.getTexture('skill_' + idC + '.png') || PIXI.Texture.WHITE
 
     const digTexture = ResourceManager.instance.getTexture('dig_fight.png')
     const digMargin = -10
@@ -50,9 +51,13 @@ export class BattleSkillCombo extends Component<any, any> {
     const groupWidth = schoolTexture.width + damageTextMetrics.width + damageTextMargin
 
     return <Container x={x} y={y} ref={div => this.containerRef = div}>
-      <Sprite anchor={{ x: 0.5, y: 0.5 }} ref={div => this.glowRef = div} texture={schoolGlowTexture}/>
-      <Sprite anchor={{ x: 0.5, y: 0.5 }} x={-skillATexture.width / 2} texture={skillATexture}/>
-      <Sprite anchor={{ x: 0.5, y: 0.5 }} x={skillATexture.width / 2} texture={skillBTexture}/>
+      <Sprite anchor={{ x: 0.5, y: 0.5 }}
+              ref={div => this.glowRef = div}
+              texture={schoolGlowTexture}/>
+      <Sprite anchor={{ x: 0.5, y: 0.5 }} x={-skillATexture.width} texture={skillATexture}/>
+      <Sprite anchor={{ x: 0.5, y: 0.5 }} x={skillATexture.width} texture={skillBTexture}/>
+      <Sprite anchor={{ x: 0.5, y: 0.5 }} texture={skillCTexture}/>
+
       <Sprite y={skillATexture.height / 2 + digMargin} anchor={{ x: 0.5, y: 0.5 }}
               texture={digTexture}/>
       <Container x={-groupWidth / 2} y={skillATexture.height / 2 + digMargin}>

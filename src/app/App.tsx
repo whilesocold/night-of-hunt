@@ -9,6 +9,8 @@ import { ResourcesConfig } from './Resources'
 import { RequestManager } from './utils/RequestManager'
 import { DataStorage } from './utils/DataStorage'
 
+import 'pixi-particles'
+
 interface AppInitOptions {
   debugMode?: boolean
 }
@@ -83,7 +85,7 @@ export class App extends EventEmitter {
       response.reward = data.reward
 
       this.storage.set({
-        response: response
+        response: response,
       })
     })
 

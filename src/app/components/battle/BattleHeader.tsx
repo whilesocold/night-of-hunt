@@ -25,9 +25,21 @@ export class BattleHeader extends Component<any, any> {
   constructor(props: any) {
     super(props)
 
+    const { response } = this.props
+
+    const userHealth = response.user.currentHealth
+    const userProgress = response.user.currentHealthPercent
+
+    const bossHealth = response.enemy.currentHealth
+    const bossProgress = response.enemy.currentHealthPercent
+
     this.state = {
       response: null,
       showDamage: false,
+      userHealth: userHealth,
+      userProgress: userProgress,
+      bossHealth: bossHealth,
+      bossProgress: bossProgress,
     }
 
     this.onResponseChangeBind = this.onResponseChange.bind(this)
@@ -44,28 +56,37 @@ export class BattleHeader extends Component<any, any> {
   }
 
   onResponseChange(e: any): void {
+    const response = e.changed.get('response')
+
     const state = {
-      response: e.changed.get('response'),
-      showDamage: false,
-    }
-
-    if (this.bossRef) {
-      state.showDamage = true
-
-      TweenUtils.bossAttack(this.bossRef)
-
-      TweenUtils.photoDamage(this.userPhotoRef.getPhoto())
-      TweenUtils.photoDamage(this.bossPhotoRef.getPhoto())
-
-      setTimeout(() => {
-        this.setState({
-          response: e.changed.get('response'),
-          showDamage: false,
-        })
-      }, 2 * 1000)
+      response: response,
+      showDamage: true,
+      userHealth: this.state.userHealth,
+      userProgress: this.state.userProgress,
+      bossHealth: response.enemy.currentHealth,
+      bossProgress: response.enemy.currentHealthPercent,
     }
 
     this.setState(state)
+
+    TweenUtils.photoDamage(this.bossPhotoRef.getPhoto())
+    TweenUtils.bossDamage(this.bossRef)
+
+    if (this.bossRef) {
+      setTimeout(async () => {
+        this.setState({
+          response: this.state.response,
+          showDamage: false,
+          userHealth: response.user.currentHealth,
+          userProgress: response.user.currentHealthPercent,
+          bossHealth: this.state.bossHealth,
+          bossProgress: this.state.bossProgress,
+        })
+
+        TweenUtils.bossAttack(this.bossRef)
+        await TweenUtils.photoDamage(this.userPhotoRef.getPhoto())
+      }, 2 * 1000)
+    }
   }
 
   render() {
@@ -82,19 +103,14 @@ export class BattleHeader extends Component<any, any> {
     const bossPhotoTexture = ResourceManager.instance.getTexture('boss_photo_' + bossId + '.png')
 
     const bossName = response.enemy.name2
-    const bossHealth = response.enemy.currentHealth
-    const bossHealthProgress = response.enemy.currentHealthPercent
-
     const userName = response.user.name
-    const userHealth = response.user.currentHealth
-    const userHealthProgress = response.user.currentHealthPercent
 
     const fightLog = response.user.fightLog[0]
 
     const damageRandomMargin = { x: 50, y: 50 }
 
-    damageRandomMargin.x = Utils.randomRange(0, damageRandomMargin.x)
-    damageRandomMargin.y = Utils.randomRange(0, damageRandomMargin.y)
+    damageRandomMargin.x = Utils.randomRange(-damageRandomMargin.x, damageRandomMargin.x)
+    damageRandomMargin.y = Utils.randomRange(-damageRandomMargin.y, damageRandomMargin.y)
 
     return <Container x={x} y={y}>
       <Sprite anchor={{ x: 0, y: 0 }} texture={backTexture}/>
@@ -106,16 +122,16 @@ export class BattleHeader extends Component<any, any> {
       <Rectangle width={backTexture.width} height={39} fill={'#000000'} alpha={0.5}/>
       <BattleUserPhoto ref={div => this.bossPhotoRef = div} texture={bossPhotoTexture}/>
       <BattleUserName anchor={{ x: 0, y: 0.5 }} x={50} y={24} color={'#e82d2c'} text={bossName}/>
-      <BattleHealth x={backTexture.width - 70} y={24} color={'#6085ad'} text={bossHealth.toString()}/>
-      <BattleHealthbar x={39} y={0} width={420} progress={bossHealthProgress}/>
+      <BattleHealth x={backTexture.width - 70} y={24} color={'#6085ad'} text={this.state.bossHealth.toString()}/>
+      <BattleHealthbar x={39} y={0} width={420} progress={this.state.bossProgress}/>
 
       <Rectangle width={backTexture.width} y={backTexture.height - 39} height={39} fill={'#000000'} alpha={0.5}/>
       <BattleUserPhoto ref={div => this.userPhotoRef = div} texture={userPhotoTexture}
                        y={backTexture.height - userPhotoTexture.height}/>
       <BattleUserName anchor={{ x: 0, y: 0.5 }} x={50} y={backTexture.height - 24} color={'#6085ad'} text={userName}/>
       <BattleHealth x={backTexture.width - 70} y={backTexture.height - 24} color={'#6085ad'}
-                    text={userHealth.toString()}/>
-      <BattleHealthbar x={39} y={backTexture.height - 9} width={420} progress={userHealthProgress}/>
+                    text={this.state.userHealth.toString()}/>
+      <BattleHealthbar x={39} y={backTexture.height - 9} width={420} progress={this.state.userProgress}/>
 
       {this.state.showDamage ? <BattleDamage x={backTexture.width / 2 + damageRandomMargin.x}
                                              y={backTexture.height / 2 + damageRandomMargin.y}

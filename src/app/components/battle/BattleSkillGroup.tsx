@@ -4,6 +4,7 @@ import { ResourceManager } from '../../utils/resources/ResourceManager'
 import { BattleSkillCombo } from './BattleSkillCombo'
 import { Container } from 'react-pixi-fiber'
 import PIXI from 'pixi.js'
+import { BattleSkillSuperCombo } from './BattleSkillSuperCombo'
 
 export class BattleSkillGroup extends Component<any, any> {
   private getCountSchool(fightDeck: any): number {
@@ -98,13 +99,11 @@ export class BattleSkillGroup extends Component<any, any> {
 
     for (const key in skillGroups) {
       const group = skillGroups[key]
+      const groupSkills = group.length
 
-      // TODO: combo x3
-      if (group.length === 1) {
+      if (groupSkills === 1) {
         const data = group[0]
         const skillWidth = skillTexture.width
-
-        console.log('data', data.id)
 
         skills.push(<BattleSkill key={data.id}
                                  x={skillX - totalWidth / 2 + skillTexture.width / 2}
@@ -118,7 +117,7 @@ export class BattleSkillGroup extends Component<any, any> {
 
         skillX += skillWidth
 
-      } else {
+      } else if (groupSkills === 2) {
         const skillA = group[0]
         const skillB = group[1]
 
@@ -137,6 +136,31 @@ export class BattleSkillGroup extends Component<any, any> {
                                       school={school}
                                       damage={damage}
                                       onSkillDown={card => onSkillDown(0)}
+        />)
+
+        skillX += skillWidth
+
+      } else if (groupSkills === 3) {
+        const skillA = group[0]
+        const skillB = group[1]
+        const skillC = group[2]
+
+        const id = skillA.id
+        const school = skillA.school
+        const damage = skillA.damage + skillB.damage + skillC.damage
+
+        const skillWidth = skillTexture.width * 2
+
+        skills.push(<BattleSkillSuperCombo key={id}
+                                           x={skillX - totalWidth / 2 + skillTexture.width}
+                                           y={0}
+                                           index={index}
+                                           idA={skillA.id}
+                                           idB={skillB.id}
+                                           idC={skillC.id}
+                                           school={school}
+                                           damage={damage}
+                                           onSkillDown={card => onSkillDown(0)}
         />)
 
         skillX += skillWidth
