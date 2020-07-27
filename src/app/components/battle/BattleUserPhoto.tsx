@@ -1,16 +1,31 @@
 import React, { Component } from 'react'
-import { Sprite } from 'react-pixi-fiber'
+import { Container, Sprite } from 'react-pixi-fiber'
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 
 export class BattleUserPhoto extends Component<any, any> {
+  private protoRef: any
+
   render() {
     let { texture, anchor, x, y } = this.props
 
-    texture = texture || ResourceManager.instance.getTexture('default_avatar.jpg')
+    texture = texture || null
     anchor = anchor || { x: 0, y: 0 }
     x = x || 0
     y = y || 0
 
-    return <Sprite x={x} y={y} anchor={anchor} texture={texture}/>
+    const backTexture = ResourceManager.instance.getTexture('default_avatar.png')
+
+    return <Container x={x} y={y}>
+      <Sprite anchor={anchor} texture={backTexture}/>
+      <Sprite ref={div => this.protoRef = div}
+              x={backTexture.width / 2}
+              y={backTexture.height / 2}
+              anchor={{ x: 0.5, y: 0.5 }}
+              texture={texture}/>
+    </Container>
+  }
+
+  public getPhoto(): Sprite {
+    return this.protoRef
   }
 }

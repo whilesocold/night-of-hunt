@@ -20,4 +20,12 @@ export class TweenUtils {
       })
     })
   }
+
+  static async photoDamage(obj: any): Promise<void> {
+    TweenMax.to(obj, 0.5, {
+      tint: 0xff0000, onComplete: () => {
+        TweenMax.to(obj, 0.25, { tint: 0xffffff })
+      },
+    })
+  }
 }

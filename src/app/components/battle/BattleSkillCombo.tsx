@@ -4,10 +4,25 @@ import * as PIXI from 'pixi.js'
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 import { TweenUtils } from '../../utils/TweenUtils'
 
+import { Linear, TweenMax } from 'gsap'
+
 export const BattleSkillColor = ['#ffac4b', '#B3E246', '#8fecff']
 
 export class BattleSkillCombo extends Component<any, any> {
   private containerRef: any
+  private glowRef: any
+
+  componentDidMount(): void {
+    this.glowRef.alpha = 0
+    this.glowRef.scale.set(0, 0)
+
+    TweenMax.to(this.glowRef, 0.8, { alpha: 1, ease: Linear.easeOut })
+    TweenMax.to(this.glowRef.scale, 0.8, {
+      x: 1.2, y: 1.2, ease: Linear.easeOut, onComplete: () => {
+        TweenMax.to(this.glowRef.scale, 0.25, { x: 1, y: 1, ease: Linear.easeIn })
+      },
+    })
+  }
 
   render() {
     const { x, y, index, idA, idB, damage, school, onSkillDown } = this.props
@@ -34,8 +49,8 @@ export class BattleSkillCombo extends Component<any, any> {
 
     const groupWidth = schoolTexture.width + damageTextMetrics.width + damageTextMargin
 
-    return <Container x={x} y={y} ref={div => (this.containerRef = div)}>
-      <Sprite anchor={{ x: 0.5, y: 0.5 }} texture={schoolGlowTexture}/>
+    return <Container x={x} y={y} ref={div => this.containerRef = div}>
+      <Sprite anchor={{ x: 0.5, y: 0.5 }} ref={div => this.glowRef = div} texture={schoolGlowTexture}/>
       <Sprite anchor={{ x: 0.5, y: 0.5 }} x={-skillATexture.width / 2} texture={skillATexture}/>
       <Sprite anchor={{ x: 0.5, y: 0.5 }} x={skillATexture.width / 2} texture={skillBTexture}/>
       <Sprite y={skillATexture.height / 2 + digMargin} anchor={{ x: 0.5, y: 0.5 }}

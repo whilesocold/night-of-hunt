@@ -48,10 +48,8 @@ export class Root extends Component<any, any> {
     }
 
     const bgTexture = ResourceManager.instance.getTexture('main_back.jpg')
-    const bossTexture = ResourceManager.instance.getTexture('boss_' + bossId + '.png')
 
     const userFightDeck = response.user.fightDeck
-
     const journal = response.user.fightLog
     const reward = response.reward
 
@@ -59,7 +57,7 @@ export class Root extends Component<any, any> {
     const hasReward = false//typeof reward !== 'undefined'
 
     const battleContent = hasReward ? null : <Container>
-      <BattleHeader x={(this.state.width - width) / 2} y={0} response={response} bossTexture={bossTexture}/>
+      <BattleHeader x={(this.state.width - width) / 2} y={0} response={response} bossId={bossId}/>
       <BattleSkillGroup x={this.state.width / 2} y={350} fightDeck={userFightDeck} onSkillDown={onSkillDown}/>
       {hasJournal ? <BattleJournal x={this.state.width / 2} y={420} journal={journal}/> : null}
     </Container>

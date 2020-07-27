@@ -108,6 +108,8 @@ export class App extends EventEmitter {
       view: this.canvas,
       width: this.width,
       height: 800,
+      antialias: true,
+      resolution: window.devicePixelRatio,
       resizeTo: window,
     })
 

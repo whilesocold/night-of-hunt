@@ -104,10 +104,12 @@ export class BattleSkillGroup extends Component<any, any> {
         const data = group[0]
         const skillWidth = skillTexture.width
 
+        console.log('data', data.id)
+
         skills.push(<BattleSkill key={data.id}
                                  x={skillX - totalWidth / 2 + skillTexture.width / 2}
                                  y={0}
-                                 index={index}
+                                 index={index + 1}
                                  id={data.id}
                                  school={data.school}
                                  damage={data.damage}
