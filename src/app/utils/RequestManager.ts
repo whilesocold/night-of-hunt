@@ -18,14 +18,17 @@ export class RequestManager extends EventEmitter {
     return new Promise(resolve => {
       this.socket = new WebSocket(url)
 
+      console.log(url)
+
       this.socket.onopen = (e: any) => {
         console.log('[open] Connection established')
-        console.log('Sending to server')
+        console.log('Sending to server', e)
 
         resolve()
       }
 
       this.socket.onmessage = (e: any) => {
+        console.log(e)
         const data = e.data
         const json = JSON.parse(data)
 

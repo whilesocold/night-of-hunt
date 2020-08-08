@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Container, Sprite, Text } from 'react-pixi-fiber'
-import { ResourceManager } from '../../utils/resources/ResourceManager'
+import { ResourceManager } from '../../src/app/utils/resources/ResourceManager'
 
 export enum BattleHealthType {
   Blue = 'BattleHealthType.Blue',

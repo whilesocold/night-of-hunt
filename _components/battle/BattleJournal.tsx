@@ -1,20 +1,17 @@
 import React, { Component } from 'react'
-import { Container, Sprite, Text } from 'react-pixi-fiber'
-import { ResourceManager } from '../../utils/resources/ResourceManager'
-import { App } from '../../App'
-import { TweenMax } from 'gsap'
 
-export class BattleJournalItem extends Component<any, any> {
-  private ref: any
+import * as PIXI from 'pixi.js'
 
-  componentDidMount(): void {
-    this.ref.alpha = 0
+import { Container, Text } from 'react-pixi-fiber'
+import { ResourceManager } from '../../src/app/utils/resources/ResourceManager'
+import { App } from '../../src/app/App'
+import { List } from '../common/List'
 
-    TweenMax.to(this.ref, 0.35, { alpha: 1 })
-  }
+export class BattleJournalItem extends PIXI.Container {
+  constructor(props) {
+    super()
 
-  render() {
-    const { x, y, userSchool, userDamage, enemySchool, enemyDamage } = this.props
+    const { userSchool, userDamage, enemySchool, enemyDamage } = props
 
     const userSchoolTexture = ResourceManager.instance.getTexture('fight_my_log_school_' + userSchool + '.png')
     const schoolTexture = ResourceManager.instance.getTexture('fight_log_school_' + enemySchool + '.png')
@@ -29,35 +26,48 @@ export class BattleJournalItem extends Component<any, any> {
 
     const logTexture = ResourceManager.instance.getTexture(userDamage > enemyDamage ? 'log2.png' : 'log3.png')
 
-    return <Container x={x} y={y} ref={div => this.ref = div}>
-      <Sprite x={-100} anchor={{ x: 1, y: 0.5 }} texture={userSchoolTexture}/>
-      <Text anchor={{ x: 0, y: 0.5 }} x={-90} text={userDamage.toString()}
-            style={{
-              fontFamily: 'Munchkin-fnt',
-              fontSize: 14,
-              fill: 0x3ead02,
-            }}
-      />
+    const schoolSprite = new PIXI.Sprite(userSchoolTexture)
+    schoolSprite.x = -100
+    schoolSprite.anchor.set(1, 0.5)
 
-      <Sprite x={0} anchor={{ x: 0.5, y: 0.5 }} texture={logTexture}/>
+    const userDamageText = new PIXI.Text(userDamage.toString(), {
+      fontFamily: 'Munchkin-fnt',
+      fontSize: 14,
+      fill: 0x3ead02,
+    })
+    userDamageText.x = -90
+    userDamageText.anchor.set(0, 0.5)
 
-      <Sprite x={100} anchor={{ x: 0, y: 0.5 }} texture={schoolTexture}/>
-      <Text anchor={{ x: 1, y: 0.5 }} x={90} text={enemyDamage.toString()}
-            style={{
-              fontFamily: 'Munchkin-fnt',
-              fontSize: 14,
-              fill: 0xa12625,
-            }}
-      />
-    </Container>
+    const logSprite = new PIXI.Sprite(logTexture)
+    logSprite.anchor.set(0.5, 0.5)
+
+    const enemyDamageText = new PIXI.Text(userDamage.toString(), {
+      fontFamily: 'Munchkin-fnt',
+      fontSize: 14,
+      fill: 0xa12625,
+    })
+    enemyDamageText.x = 90
+    enemyDamageText.anchor.set(1, 0.5)
+
+    this.addChild(
+      schoolSprite,
+      userDamageText,
+      logSprite,
+      enemyDamageText,
+    )
   }
 }
 
 export class BattleJournal extends Component<any, any> {
   private onResponseChangeBind: (changed: any) => void
+  private items: any[]
+  private itemIndex: number
 
   constructor(props: any) {
     super(props)
+
+    this.items = []
+    this.itemIndex = 0
 
     this.state = {
       response: null,
@@ -85,7 +95,8 @@ export class BattleJournal extends Component<any, any> {
       journal = this.state.response.user.fightLog
     }
 
-    const journalItems = []
+    this.items = []
+
     const journalItemStartY = 35
     const journalItemMargin = 35
 
@@ -96,14 +107,13 @@ export class BattleJournal extends Component<any, any> {
     for (let i = 0; i < journal.length; i++) {
       const journalData = journal[i]
 
-      journalItems.push(<BattleJournalItem key={i}
-                                           x={0}
-                                           y={journalItemStartY + journalItemMargin * i}
-                                           userSchool={journalData.schools[0]}
-                                           userDamage={journalData.damage}
-                                           enemySchool={journalData.enemySchools[0]}
-                                           enemyDamage={journalData.enemyDamage}
-      />)
+      this.items.push(new BattleJournalItem({
+        index: i,
+        userSchool: journalData.schools[0],
+        userDamage: journalData.damage,
+        enemySchool: journalData.enemySchools[0],
+        enemyDamage: journalData.enemyDamage,
+      }))
     }
 
     return <Container x={x} y={y}>
@@ -113,7 +123,7 @@ export class BattleJournal extends Component<any, any> {
               fontSize: 14,
               fill: 0x303c4e,
             }}/>
-      {journalItems}
+      <List x={0} y={journalItemStartY} margin={{ y: journalItemMargin }} items={this.items}/>
     </Container>
   }
 }

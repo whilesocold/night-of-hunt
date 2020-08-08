@@ -1,16 +1,25 @@
 import React, { Component } from 'react'
 import { Container, Sprite, Text } from 'react-pixi-fiber'
 import * as PIXI from 'pixi.js'
-import { ResourceManager } from '../../utils/resources/ResourceManager'
-import { TweenUtils } from '../../utils/TweenUtils'
+import { ResourceManager } from '../../src/app/utils/resources/ResourceManager'
+import { TweenUtils } from '../../src/app/utils/TweenUtils'
 
 import { Linear, TweenMax } from 'gsap'
+import { BattleSkillComboType } from '../../src/app/data/BattleSkillComboType'
+
 
 export const BattleSkillColor = ['#ffac4b', '#B3E246', '#8fecff']
 
 export class BattleSkillCombo extends Component<any, any> {
   private containerRef: any
   private glowRef: any
+  private skillRefs: any
+
+  constructor(props: any) {
+    super(props)
+
+    this.skillRefs = []
+  }
 
   componentDidMount(): void {
     this.glowRef.alpha = 0
@@ -51,8 +60,10 @@ export class BattleSkillCombo extends Component<any, any> {
 
     return <Container x={x} y={y} ref={div => this.containerRef = div}>
       <Sprite anchor={{ x: 0.5, y: 0.5 }} ref={div => this.glowRef = div} texture={schoolGlowTexture}/>
-      <Sprite anchor={{ x: 0.5, y: 0.5 }} x={-skillATexture.width / 2} texture={skillATexture}/>
-      <Sprite anchor={{ x: 0.5, y: 0.5 }} x={skillATexture.width / 2} texture={skillBTexture}/>
+      <Sprite anchor={{ x: 0.5, y: 0.5 }} ref={div => this.skillRefs.push(div)} x={-skillATexture.width / 2}
+              texture={skillATexture}/>
+      <Sprite anchor={{ x: 0.5, y: 0.5 }} ref={div => this.skillRefs.push(div)} x={skillATexture.width / 2}
+              texture={skillBTexture}/>
       <Sprite y={skillATexture.height / 2 + digMargin} anchor={{ x: 0.5, y: 0.5 }}
               texture={digTexture}/>
       <Container x={-groupWidth / 2} y={skillATexture.height / 2 + digMargin}>
@@ -67,7 +78,7 @@ export class BattleSkillCombo extends Component<any, any> {
               interactiveChildren={false}
               pointerdown={async (e) => {
                 await TweenUtils.buttonClick(this.containerRef)
-                onSkillDown(index)
+                onSkillDown(index,  BattleSkillComboType.Combo)
               }}
       />
     </Container>

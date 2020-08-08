@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { Container, Sprite, Text } from 'react-pixi-fiber'
 import * as PIXI from 'pixi.js'
-import { ResourceManager } from '../../utils/resources/ResourceManager'
-import { TweenUtils } from '../../utils/TweenUtils'
+import { ResourceManager } from '../../src/app/utils/resources/ResourceManager'
+import { TweenUtils } from '../../src/app/utils/TweenUtils'
 
 export const BattleSkillColor = ['#ffac4b', '#B3E246', '#8fecff']
 

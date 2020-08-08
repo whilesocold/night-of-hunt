@@ -1,49 +1,50 @@
-import EventEmitter from 'eventemitter3'
 import * as PIXI from 'pixi.js'
-import React from 'react'
 
-import { render } from 'react-pixi-fiber'
-import { Root } from './components/Root'
+import EventEmitter from 'eventemitter3'
+
 import { ResourceManager, ResourceManagerEvent } from './utils/resources/ResourceManager'
 import { ResourcesConfig } from './Resources'
 import { RequestManager } from './utils/RequestManager'
 import { DataStorage } from './utils/DataStorage'
-
-import 'pixi-particles'
+import { BattleSkillComboType } from './data/BattleSkillComboType'
+import { BattleScreen } from './components/battle/BattleScreen'
+import { GameEvent } from './data/GameEvent'
 
 interface AppInitOptions {
   debugMode?: boolean
 }
 
-export class App extends EventEmitter {
+export const EventBus = new EventEmitter()
+export const State = new DataStorage()
+
+export class App {
   public static instance: App
 
   private canvas: HTMLCanvasElement
+
   private app: PIXI.Application
+  private stage: PIXI.Container
+  private ticker: PIXI.Ticker
 
   private width: number
 
   private resourceManager: ResourceManager
   private requestManager: RequestManager
 
-  private storage: DataStorage
+  private screen: BattleScreen
 
   constructor() {
-    super()
-
     App.instance = this
   }
 
   private initStorage(): Promise<void> {
     const urlParams = new URLSearchParams(window.location.search)
     const bossId = urlParams.has('bossId') ? urlParams.get('bossId') : 12
-    const sessionId = urlParams.has('sessionId') ? urlParams.get('sessionId') : 'node0y83vqbsk259wy1urugzobjz0323.node0'
+    const sessionId = urlParams.has('jsessionId') ? urlParams.get('jsessionId') : 'node0y83vqbsk259wy1urugzobjz0323'
 
-    this.storage = new DataStorage()
-    this.storage.set({
+    State.set({
       bossId: bossId,
       sessionId: sessionId,
-      response: {},
     })
 
     return Promise.resolve()
@@ -63,9 +64,9 @@ export class App extends EventEmitter {
   private async connectToServer(url: string): Promise<void> {
     return new Promise(async resolve => {
       this.requestManager = new RequestManager()
-      this.requestManager.once('init', response => {
-        this.storage.set('response', response)
-
+      this.requestManager.once('init', data => {
+        State.set(data)
+        EventBus.emit(GameEvent.BattleStarting, State)
         resolve()
       })
 
@@ -73,20 +74,11 @@ export class App extends EventEmitter {
     })
   }
 
-  private async onSkillDown(card: number): Promise<void> {
+  private async onSkillDown(card: number, comboType: BattleSkillComboType = null): Promise<void> {
     console.log(card)
 
-    this.requestManager.once('attack', (data) => {
-      console.log(data)
-      const response = this.storage.get('response')
-
-      response.user = data.user
-      response.enemy = data.enemy
-      response.reward = data.reward
-
-      this.storage.set({
-        response: response,
-      })
+    this.requestManager.once('attack', data => {
+      EventBus.emit(GameEvent.BattleAttack, State)
     })
 
     await this.requestManager.request({
@@ -100,7 +92,7 @@ export class App extends EventEmitter {
 
     await this.initStorage()
     await this.loadResources(ResourcesConfig)
-    await this.connectToServer('wss://ohota.mobi/ws/fightBoss?bossId=' + this.storage.get('bossId') + '&jsessionid=' + this.storage.get('sessionId'))
+    await this.connectToServer('wss://ohota.mobi/ws/fightBoss;jsessionid=' + State.get('sessionId') + '?bossId=' + State.get('bossId'))
 
     this.width = 460
 
@@ -115,15 +107,41 @@ export class App extends EventEmitter {
       resizeTo: window,
     })
 
-    render(<Root width={this.width}
-                 bossId={this.storage.get('bossId')}
-                 response={this.storage.get('response')}
-                 app={this.app}
-                 onSkillDown={id => this.onSkillDown(id)}
-    />, this.app.stage)
+    this.ticker = this.app.ticker
+    this.stage = this.app.stage
+
+    this.screen = new BattleScreen()
+    this.stage.addChild(this.screen)
+
+    this.ticker.add((dt) => this.onUpdate(dt))
+
+    window.addEventListener('resize', () => this.onResize())
+
+    this.onUpdate(1)
+    this.onResize()
   }
 
-  public getStorage(): DataStorage {
-    return this.storage
+  private onUpdate(dt: number): void {
+    if (this.screen) {
+      this.screen.update(dt)
+    }
+  }
+
+  private onResize(): void {
+    if (this.screen) {
+      this.screen.resize(window.innerWidth, window.innerHeight)
+    }
+  }
+
+  public getApp(): PIXI.Application {
+    return this.app
+  }
+
+  public getStage(): PIXI.Container {
+    return this.stage
+  }
+
+  getTicker(): PIXI.Ticker {
+    return this.ticker
   }
 }

@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import { Container, Sprite, Text } from 'react-pixi-fiber'
 import * as PIXI from 'pixi.js'
-import { ResourceManager } from '../../utils/resources/ResourceManager'
-import { TweenUtils } from '../../utils/TweenUtils'
+import { ResourceManager } from '../../src/app/utils/resources/ResourceManager'
+import { TweenUtils } from '../../src/app/utils/TweenUtils'
 
 import { Linear, TweenMax } from 'gsap'
+import { BattleSkillComboType } from '../../src/app/data/BattleSkillComboType'
 
 export const BattleSkillColor = ['#ffac4b', '#B3E246', '#8fecff']
 
@@ -72,7 +73,7 @@ export class BattleSkillSuperCombo extends Component<any, any> {
               interactiveChildren={false}
               pointerdown={async (e) => {
                 await TweenUtils.buttonClick(this.containerRef)
-                onSkillDown(index)
+                onSkillDown(index, BattleSkillComboType.SuperCombo)
               }}
       />
     </Container>

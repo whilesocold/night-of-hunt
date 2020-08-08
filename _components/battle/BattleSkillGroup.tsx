@@ -1,82 +1,20 @@
 import React, { Component } from 'react'
+import PIXI from 'pixi.js'
+
 import { BattleSkill } from './BattleSkill'
-import { ResourceManager } from '../../utils/resources/ResourceManager'
+import { ResourceManager } from '../../src/app/utils/resources/ResourceManager'
 import { BattleSkillCombo } from './BattleSkillCombo'
 import { Container } from 'react-pixi-fiber'
-import PIXI from 'pixi.js'
 import { BattleSkillSuperCombo } from './BattleSkillSuperCombo'
+import { BattleDataUtils } from '../../src/app/data/BattleDataUtils'
 
 export class BattleSkillGroup extends Component<any, any> {
-  private getCountSchool(fightDeck: any): number {
-    let school = 0
-    let countSchool = 1
-
-    for (let i = 0; i < 3; i++) {
-      if (fightDeck.length > i) {
-        const fightCard = fightDeck[i]
-
-        if (school == fightCard.school) {
-          countSchool++
-        }
-
-        school = fightCard.school
-      }
-    }
-
-    return countSchool
-  }
-
-  private getGroups(fightDeck: any): any {
-    const result = {}
-
-    console.log(fightDeck)
-
-    for (let i = 0; i < fightDeck.length; i++) {
-      const fightCard = fightDeck[i]
-      const schoolKey = 'school' + fightCard.school.toString()
-
-      if (!result[schoolKey]) {
-        result[schoolKey] = []
-      }
-
-      result[schoolKey].push(fightCard)
-    }
-
-    return result
-  }
-
-  private getDamage(fightDeck: any, from: number, to: number, countSchool: number) {
-    const X2 = 1.5
-    const X3 = 2
-
-    let k = 1
-
-    if (countSchool == 2) {
-      k = X2
-
-    } else if (countSchool == 3) {
-      k = X3
-    }
-
-    let damage = 0
-
-    for (let i = 0; i < 3; i++) {
-      if (fightDeck.length > i) {
-        if (i >= from && i <= to) {
-          damage += fightDeck[i].damage * k
-        }
-      }
-    }
-
-    return damage
-  }
-
   render() {
     let { x, y, fightDeck, onSkillDown } = this.props
     const skills = []
 
     const skillTexture = ResourceManager.instance.getTexture('skill_1.png') || PIXI.Texture.WHITE
-    const skillGroups = this.getGroups(fightDeck)
+    const skillGroups = BattleDataUtils.getGroups(fightDeck)
 
     const margin = 0
 
@@ -135,7 +73,7 @@ export class BattleSkillGroup extends Component<any, any> {
                                       idB={skillB.id}
                                       school={school}
                                       damage={damage}
-                                      onSkillDown={card => onSkillDown(0)}
+                                      onSkillDown={(card, comboType) => onSkillDown(0, comboType)}
         />)
 
         skillX += skillWidth
@@ -160,7 +98,7 @@ export class BattleSkillGroup extends Component<any, any> {
                                            idC={skillC.id}
                                            school={school}
                                            damage={damage}
-                                           onSkillDown={card => onSkillDown(0)}
+                                           onSkillDown={(card, comboType) => onSkillDown(0, comboType)}
         />)
 
         skillX += skillWidth

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Container, Sprite } from 'react-pixi-fiber'
-import { ResourceManager } from '../../utils/resources/ResourceManager'
+import { ResourceManager } from '../../src/app/utils/resources/ResourceManager'
 
 export class BattleUserPhoto extends Component<any, any> {
   private protoRef: any

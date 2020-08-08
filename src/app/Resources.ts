@@ -9,6 +9,16 @@ const resources = {
   'back6.jpg': 'res/images/backgrounds/back6.jpg',
   'back7.jpg': 'res/images/backgrounds/back7.jpg',
 
+  // Effects
+  'rain_1_png': 'res/images/effects/rain_1.png',
+  'snowflake_1_png': 'res/images/effects/snowflake_1.png',
+  'smoke_1_png': 'res/images/effects/smoke_1.png',
+  'star_1_png': 'res/images/effects/star_1.png',
+
+  'blood_splash_1_png': 'res/images/effects/blood_splash_1.png',
+  'blood_splash_2_png': 'res/images/effects/blood_splash_2.png',
+  'blood_splash_3_png': 'res/images/effects/blood_splash_3.png',
+
   // Icons
   'default_avatar.png': 'res/images/icons/default_avatar.png',
   'maneken.png': 'res/images/icons/maneken.png',
@@ -153,10 +163,12 @@ const resources = {
   'school_1.png': 'res/images/schools/school_1.png',
   'school_2.png': 'res/images/schools/school_2.png',
   'school_3.png': 'res/images/schools/school_3.png',
-
   'school_glow_1.png': 'res/images/schools/school_glow_1.png',
   'school_glow_2.png': 'res/images/schools/school_glow_2.png',
   'school_glow_3.png': 'res/images/schools/school_glow_3.png',
+  'school_back_1.png': 'res/images/schools/school_back_1.png',
+  'school_back_2.png': 'res/images/schools/school_back_2.png',
+  'school_back_3.png': 'res/images/schools/school_back_3.png',
 
   // Other
   'dig_fight.png': 'res/images/dig_fight.png',

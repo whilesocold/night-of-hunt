@@ -11,13 +11,13 @@ export class BattleDamage extends Component<any, any> {
   }
 
   render() {
-    let { anchor, x, y, damage } = this.props
+    let { anchor, x, y, damage, size } = this.props
 
     anchor = anchor || { x: 0.5, y: 0.5 }
     x = x || 0
     y = y || 0
 
-    return <Container x={x} y={y} ref={ref => this.ref = ref} alpha={0}>
+    return <Container x={x} y={y} ref={ref => this.ref = ref} alpha={0} scale={{ x: size, y: size }}>
       <Text anchor={anchor} text={'-' + damage.toString()} style={{
         fontFamily: 'Munchkin-fnt',
         fontSize: 64,
