@@ -39,7 +39,36 @@ export class BattleSkillCombo extends PIXI.Container {
       const skillIcon = new PIXI.Sprite(ResourceManager.instance.getTexture('skill_' + skillId + '.png') || PIXI.Texture.WHITE)
 
       skillIcon.anchor.set(0.5)
-      skillIcon.x = skillIcon.width / 2 + skillIcon.width * i
+
+      if (skillIds.length === 2) {
+        if (index === 0) {
+          if (i === 0) {
+            skillIcon.x = 0
+
+          } else if (i === 1) {
+            skillIcon.x = skillIcon.width
+          }
+
+        } else {
+          if (i === 0) {
+            skillIcon.x = -skillIcon.width
+
+          } else if (i === 1) {
+            skillIcon.x = 0//skillIcon.width
+          }
+        }
+
+      } else if (skillIds.length === 3) {
+        if (i === 0) {
+          skillIcon.x = -skillIcon.width
+
+        } else if (i === 1) {
+          skillIcon.x = 0
+
+        } else if (i === 2) {
+          skillIcon.x = skillIcon.width
+        }
+      }
 
       this.skillIcons.push(skillIcon)
       this.skillContainer.addChild(skillIcon)
@@ -80,7 +109,7 @@ export class BattleSkillCombo extends PIXI.Container {
     this.digContainer.addChild(this.digSchoolIcon)
     this.digContainer.addChild(this.digDamageLabel)
 
-    this.digBackIcon.x = this.skillIcons[0].width
+    this.digBackIcon.x = index === 0 ? this.skillIcons[0].width / 2 :  -this.skillIcons[0].width/2
     this.digBackIcon.y = this.skillIcons[0].height / 2 - 10
 
     this.digContainer.x = this.digBackIcon.x - this.digContainer.width / 2

@@ -38,8 +38,12 @@ export class DataStorage extends EventEmitter {
     }
   }
 
+  has(key: string): any {
+    return this.attributes.has(key)
+  }
+
   get(key: string): any {
-    if (this.attributes.has(key)) {
+    if (this.has(key)) {
       return this.attributes.get(key)
     }
 

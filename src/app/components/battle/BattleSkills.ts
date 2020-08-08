@@ -4,17 +4,24 @@ import { TweenMax } from 'gsap'
 import { BattleSkill } from './BattleSkill'
 import { BattleSkillCombo } from './BattleSkillCombo'
 import { BattleSkillSuperCombo } from './BattleSkillSuperCombo'
-import { State } from '../../App'
+import { EventBus, State } from '../../App'
 import { BattleDataUtils } from '../../data/BattleDataUtils'
+import { GameEvent } from '../../data/GameEvent'
 
 export class BattleSkills extends PIXI.Container {
   protected skills: any[]
   protected container: PIXI.Container
 
+  protected canEnableSkills: boolean
+
+  protected onPlayerTurnStartingBind: (state) => void
+  protected onTurnWaitingBind: (state) => void
+
   constructor() {
     super()
 
     this.skills = []
+    this.canEnableSkills = true
 
     this.container = new PIXI.Container()
     this.addChild(this.container)
@@ -33,18 +40,53 @@ export class BattleSkills extends PIXI.Container {
      */
     //this.rearrangeSkills(true)
     this.initFromState()
+
+    this.onPlayerTurnStartingBind = this.onPlayerTurnStarting.bind(this)
+    this.onTurnWaitingBind = this.onTurnWaiting.bind(this)
+
+    EventBus.on(GameEvent.BattlePlayerTurnStarting, this.onPlayerTurnStartingBind)
+    EventBus.on(GameEvent.BattleTurnWaiting, this.onTurnWaitingBind)
+  }
+
+  protected onPlayerTurnStarting(state): void {
+    this.initFromState()
+  }
+
+  protected onTurnWaiting(state): void {
+    this.enableSkills()
+  }
+
+  protected getSkillPosition(index: number): number {
+    const margin = 40
+    const skillWidth = 96
+
+    if (index === 0) {
+      return -(skillWidth) - margin
+
+    } else if (index === 2) {
+      return skillWidth + margin
+    }
+
+    return 0
   }
 
   protected initFromState(): void {
+    while (this.container.children.length > 0) {
+      this.container.removeChildAt(0)
+    }
+
+    this.skills = []
+
     const userState = State.get('user')
-    const userDeck = BattleDataUtils.getGroups(userState.fightDeck)
+    const userDeck = userState.fightDeck//BattleDataUtils.getGroups(userState.fightDeck)
 
-    for (const school in userDeck) {
-      const groupData = userDeck[school]
+    for (let i = 0; i < userDeck.length; i++) {
+      const groupData = userDeck[i]
 
-      for (let i = 0; i < groupData.length; i++) {
-        this.addSkill([groupData[i].id], groupData[i].school, groupData[i].damage, this.skills.length)
-      }
+      const index = this.skills.length
+      const x = this.getSkillPosition(index)
+
+      this.addSkill([groupData.id], groupData.school, groupData.damage, index, x)
     }
 
     const skillGroups = this.getSkillGroups(this.skills)
@@ -56,35 +98,55 @@ export class BattleSkills extends PIXI.Container {
       console.log(skillGroup)
 
       if (skillGroup.length === 2) {
-
-        this.morphSkillsToCombo(
+        this.morphSkillsToCombo2(
           [skillGroup[0].index, skillGroup[1].index],
           [skillGroup[0].skillId, skillGroup[1].skillId],
           skillGroup[0].schoolId,
-          skillGroup[0].damage)
+          [skillGroup[0].damage, skillGroup[1].damage])
+
+
+      } else if (skillGroup.length === 3) {
+        this.morphSkillsToCombo3(
+          [skillGroup[0].index, skillGroup[1].index, skillGroup[2].index],
+          [skillGroup[0].skillId, skillGroup[1].skillId, skillGroup[2].skillId],
+          skillGroup[0].schoolId,
+          [skillGroup[0].damage, skillGroup[1].damage, skillGroup[2].damage])
       }
     }
-
   }
 
   protected getSkillGroups(skills: any): any {
-    const result = {}
+    let result = {}
+    let prevSchool = undefined
+    let index = 0
+
+    console.log('skills', skills)
 
     for (let i = 0; i < skills.length; i++) {
       const skill = skills[i]
-      const schoolKey = 'school' + skill.schoolId.toString()
+      const school = skill.schoolId
 
-      if (!result[schoolKey]) {
-        result[schoolKey] = []
+      console.log(prevSchool, school, index)
+
+      if (prevSchool !== school) {
+        index++
       }
 
-      result[schoolKey].push(skill)
+      if (!result[index]) {
+        result[index] = []
+      }
+
+      result[index].push(skill)
+
+      prevSchool = school
     }
+
+    console.log('result', result)
 
     return result
   }
 
-  public async addSkill(skillIds: number[], schoolId: number, damage: number, index: number, x: number = undefined): Promise<void> {
+  public async addSkill(skillIds: number[], schoolId: number, damage: number, index: number, x: number): Promise<void> {
     return new Promise(resolve => {
       let skill = null
 
@@ -102,21 +164,17 @@ export class BattleSkills extends PIXI.Container {
         return resolve()
       }
 
-      const margin = 40
-      //const index = this.skills.length
-      //const previousSkill = index > 0 ? this.skills[index - 1] : null
-
       skill.alpha = 0
-      skill.x = typeof x !== 'undefined' ? x : (96 + margin) * index
+      skill.x = x
 
       this.skills.push(skill)
       this.container.addChild(skill)
 
       TweenMax.to(skill, 1, {
         alpha: 1, onComplete: () => {
-          skill.buttonMode = true
-          skill.interactive = true
-          skill.on('pointerdown', () => this.onSkillPointerDown(skill.index))
+          skill.buttonMode = this.canEnableSkills
+          skill.interactive = this.canEnableSkills
+          skill.on('pointerdown', () => this.onSkillPointerDown(index))
 
           resolve()
         },
@@ -124,30 +182,48 @@ export class BattleSkills extends PIXI.Container {
     })
   }
 
-  public async morphSkillsToCombo(indices: number [], skillIds: number[], schoolId: number, damage: number): Promise<void> {
+  public async morphSkillsToCombo2(indices: number [], skillIds: number[], schoolId: number, damages: number[]): Promise<void> {
     const indexA = indices[0]
     const indexB = indices[1]
 
     const skillA = this.skills[indexA]
     const skillB = this.skills[indexB]
 
-    const offset = 50
-
-    this.skills.splice(indexA, 1)
-    this.skills.splice(indexB - 1, 1)
+    this.skills.splice(indexA, 2)
 
     const targetSkill = indexA === 0 ? skillB : skillA
-    const targetPosition = indexA === 0 ? skillB.x - offset : skillA.x + offset
+    const targetPosition = indexA === 0 ? skillA.x + skillA.width : skillB.x - skillB.width
 
     TweenMax.to(targetSkill, 0.5, { x: targetPosition })
 
     setTimeout(async () => {
-      const morphIndex = indexA === 0 ? 0 : 1
+      await this.addSkill(skillIds, schoolId, BattleDataUtils.getDamage(damages), indexA === 0 ? 0 : 1, this.getSkillPosition(indexA === 0 ? 0 : 2))
 
-      await this.addSkill(skillIds, schoolId, damage, morphIndex, targetPosition)
+      this.container.removeChild(skillA)
+      this.container.removeChild(skillB)
+    }, 250)
+  }
 
-      //this.container.removeChild(skillA)
-      //this.container.removeChild(skillB)
+  public async morphSkillsToCombo3(indices: number [], skillIds: number[], schoolId: number, damages: number[]): Promise<void> {
+    const indexA = indices[0]
+    const indexB = indices[1]
+    const indexC = indices[2]
+
+    const skillA = this.skills[indexA]
+    const skillB = this.skills[indexB]
+    const skillC = this.skills[indexC]
+
+    this.skills.splice(0, 3)
+
+    TweenMax.to(skillA, 0.5, { x: skillB.x - skillA.width })
+    TweenMax.to(skillC, 0.5, { x: skillB.x + skillC.width })
+
+    setTimeout(async () => {
+      await this.addSkill(skillIds, schoolId, BattleDataUtils.getDamage(damages), 0, this.getSkillPosition(1))
+
+      this.container.removeChild(skillA)
+      this.container.removeChild(skillB)
+      this.container.removeChild(skillC)
     }, 250)
   }
 
@@ -191,12 +267,31 @@ export class BattleSkills extends PIXI.Container {
     }
   }
 
+  protected enableSkills(): void {
+    this.canEnableSkills = true
+
+    for (let i = 0; i < this.skills.length; i++) {
+      this.skills[i].interactive = true
+      this.skills[i].buttonMode = true
+    }
+  }
+
+  protected disableSkills(): void {
+    this.canEnableSkills = false
+
+    for (let i = 0; i < this.skills.length; i++) {
+      this.skills[i].interactive = false
+      this.skills[i].buttonMode = false
+    }
+  }
+
   protected onSkillPointerDown(index: number): void {
-    console.log(index, this.skills)
+    const skill = this.skills.find(skill => skill.index === index)
     this.removeSkill(index)
       .then(() => {
-        this.addSkill([1], 1, 1, index)
-        this.addSkill([3], 1, 1, index + 1)
+        this.disableSkills()
+
+        EventBus.emit(GameEvent.BattleAttack, skill instanceof BattleSkill ? skill.index + 1 : 0)
       })
   }
 }

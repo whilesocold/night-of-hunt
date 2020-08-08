@@ -1,6 +1,7 @@
 export enum GameEvent {
   BattleStarting = 'GameEvent.BattleStarting',
   BattleAttack = 'GameEvent.BattleAttack',
+  BattleTurnWaiting = 'GameEvent.BattleTurnWaiting',
   BattlePlayerTurnStarting = 'GameEvent.BattlePlayerTurnStarting',
   BattlePlayerTurnEnding = 'GameEvent.BattlePlayerTurnEnding',
   BattleEnemyTurnStarting = 'GameEvent.BattleEnemyTurnStarting',

@@ -9,6 +9,13 @@ import { EventBus, State } from '../../App'
 import { GameEvent } from '../../data/GameEvent'
 import { BattleState } from '../../data/BattleState'
 import { BattleUserState } from '../../data/BattleUserState'
+import { MaskingEffect } from '../effects/MaskingEffect'
+import { AnimatedAtlasEffect } from '../effects/AnimatedAtlasEffect'
+import { Utils } from '../../utils/Utils'
+import { TweenUtils } from '../../utils/TweenUtils'
+import { DamageLabelEffect } from '../effects/DamageLabelEffect'
+
+import RainEffectConfig from '../../configs/effects/RainEffectConfig'
 
 export class BattleHeader extends PIXI.Container {
   protected userState: BattleUserState
@@ -17,7 +24,8 @@ export class BattleHeader extends PIXI.Container {
   protected container: PIXI.Container
 
   protected back: PIXI.Sprite
-  protected boss: PIXI.Sprite
+  protected enemy: PIXI.Sprite
+  protected weatherEffect: MaskingEffect
 
   protected containerMask: PIXI.Graphics
 
@@ -36,8 +44,16 @@ export class BattleHeader extends PIXI.Container {
   protected userHealthbar: BattleHealthbar
   protected enemyHealthbar: BattleHealthbar
 
+  protected enemyDamageEffect: AnimatedAtlasEffect
+  protected enemyDamageLabelEffect: DamageLabelEffect
+
   protected onBattleStartingBind: (state: BattleState) => void
-  protected onBattlePlayerTurnStartingBind: (state: BattleState) => void
+
+  protected onBattlePlayerTurnStartingBind: (state) => void
+  protected onBattlePlayerTurnEndingBind: (state) => void
+
+  protected onBattleEnemyTurnStartingBind: (state) => void
+  protected onBattleEnemyTurnEndingBind: (state) => void
 
   constructor() {
     super()
@@ -52,14 +68,30 @@ export class BattleHeader extends PIXI.Container {
     this.container = new PIXI.Container()
     this.container.position.set(0, 39)
 
-    this.boss = new PIXI.Sprite(ResourceManager.instance.getTexture('boss_' + bossId + '.png'))
-    this.boss.anchor.set(0.5, 1)
-    this.boss.position.set(this.back.width / 2, this.back.height + this.container.y + 50)
+    this.enemy = new PIXI.Sprite(ResourceManager.instance.getTexture('boss_' + bossId + '.png'))
+    this.enemy.anchor.set(0.5, 1)
+    this.enemy.position.set(this.back.width / 2, this.back.height + this.container.y + 50)
+
+    TweenUtils.enemyStand(this.enemy)
+
+    this.weatherEffect = new MaskingEffect(
+      [ResourceManager.instance.getTexture('rain_1_png')],
+      Object.assign(RainEffectConfig, {
+        'spawnRect': {
+          'x': -this.back.width / 2,
+          'y': -this.back.height / 2,
+          'w': this.back.width * 1.5,
+          'h': this.back.height * 1.5,
+        },
+      }))
 
     this.enemyBack = new PIXI.Graphics()
     this.enemyBack.beginFill(0x000000, 0.5)
     this.enemyBack.drawRect(0, 0, this.back.width, 39)
     this.enemyBack.endFill()
+
+    this.enemyDamageEffect = new AnimatedAtlasEffect()
+    this.enemyDamageLabelEffect = new DamageLabelEffect()
 
     this.userBack = new PIXI.Graphics()
     this.userBack.beginFill(0x000000, 0.5)
@@ -91,7 +123,10 @@ export class BattleHeader extends PIXI.Container {
     this.userHealthbar.position.set(this.userPhoto.x + this.userPhoto.width, this.userBack.y + this.userBack.height - 8)
 
     this.container.addChild(this.back)
-    this.container.addChild(this.boss)
+    this.container.addChild(this.weatherEffect)
+    this.container.addChild(this.enemy)
+    this.container.addChild(this.enemyDamageEffect)
+    this.container.addChild(this.enemyDamageLabelEffect)
 
     this.containerMask = new PIXI.Graphics()
     this.containerMask.beginFill(0xffffff, 0.5)
@@ -125,16 +160,81 @@ export class BattleHeader extends PIXI.Container {
   protected initEvents(): void {
     this.onBattleStartingBind = this.onBattleStarting.bind(this)
     this.onBattlePlayerTurnStartingBind = this.onBattlePlayerTurnStarting.bind(this)
+    this.onBattlePlayerTurnEndingBind = this.onBattlePlayerTurnEnding.bind(this)
+    this.onBattleEnemyTurnStartingBind = this.onBattleEnemyTurnStarting.bind(this)
+    this.onBattleEnemyTurnEndingBind = this.onBattleEnemyTurnEnding.bind(this)
 
-    EventBus.once(GameEvent.BattleStarting, this.onBattleStartingBind)
-    EventBus.once(GameEvent.BattlePlayerTurnStarting, this.onBattlePlayerTurnStartingBind)
+    EventBus.on(GameEvent.BattleStarting, this.onBattleStartingBind)
+
+    EventBus.on(GameEvent.BattlePlayerTurnStarting, this.onBattlePlayerTurnStartingBind)
+    EventBus.on(GameEvent.BattlePlayerTurnEnding, this.onBattlePlayerTurnEndingBind)
+    EventBus.on(GameEvent.BattleEnemyTurnStarting, this.onBattleEnemyTurnStartingBind)
+    EventBus.on(GameEvent.BattleEnemyTurnEnding, this.onBattleEnemyTurnEndingBind)
   }
 
-  protected onBattleStarting(state: BattleState): void {
+  protected onBattleStarting(state): void {
     console.log('onBattleStarting', state)
   }
 
-  protected onBattlePlayerTurnStarting(state: BattleState): void {
+  protected onBattlePlayerTurnStarting(state): void {
     console.log('onBattlePlayerTurnStarting', state)
+
+    const userState = State.get('user')
+    const enemyState = State.get('enemy')
+
+    const fightLog = userState.fightLog
+
+    TweenUtils.enemyDamage(this.enemy)
+    TweenUtils.photoDamage(this.enemyPhoto.getPhoto())
+
+    this.enemyHealth.setValue(enemyState.currentHealth)
+    this.enemyHealthbar.setValue(enemyState.currentHealthPercent)
+
+    this.enemyDamageEffect.position.set(this.back.width / 2, this.back.height / 2)
+    this.enemyDamageEffect.setFrames('blood_splash_' + Utils.randomRange(2, 2) + '_png',
+      512,
+      512,
+      15)
+    this.enemyDamageEffect.play()
+
+    if (fightLog.length > 0) {
+      this.enemyDamageLabelEffect.position.set(this.back.width / 2, this.back.height / 2)
+      this.enemyDamageLabelEffect.show(fightLog[0].damage, 1)
+    }
+
+    setTimeout(() => {
+      EventBus.emit(GameEvent.BattlePlayerTurnEnding, state)
+    }, 1000)
+  }
+
+  protected onBattlePlayerTurnEnding(state): void {
+    console.log('onBattlePlayerTurnEnding', state)
+
+    this.enemyDamageLabelEffect.hide()
+
+    setTimeout(() => {
+      EventBus.emit(GameEvent.BattleEnemyTurnStarting, state)
+    }, 500)
+  }
+
+  protected onBattleEnemyTurnStarting(state): void {
+    console.log('onBattleEnemyTurnStarting', state)
+
+    const userState = state.get('user')
+
+    TweenUtils.photoDamage(this.userPhoto.getPhoto())
+
+    this.userHealth.setValue(userState.currentHealth)
+    this.userHealthbar.setValue(userState.currentHealthPercent)
+
+    setTimeout(() => {
+      EventBus.emit(GameEvent.BattleEnemyTurnEnding, state)
+    }, 1000)
+  }
+
+  protected onBattleEnemyTurnEnding(state): void {
+    console.log('onBattleEnemyTurnEnding', state)
+
+    EventBus.emit(GameEvent.BattleTurnWaiting, state)
   }
 }

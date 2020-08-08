@@ -20,29 +20,24 @@ export class BattleDataUtils {
     return result
   }
 
-  static getDamage(fightDeck: any, from: number, to: number, countSchool: number) {
+  static getDamage(damages: number[]) {
     const X2 = 1.5
     const X3 = 2
 
+    let damage = 0
     let k = 1
 
-    if (countSchool == 2) {
+    if (damages.length == 2) {
       k = X2
 
-    } else if (countSchool == 3) {
+    } else if (damages.length == 3) {
       k = X3
     }
 
-    let damage = 0
-
-    for (let i = 0; i < 3; i++) {
-      if (fightDeck.length > i) {
-        if (i >= from && i <= to) {
-          damage += fightDeck[i].damage * k
-        }
-      }
+    for (let i = 0; i < damages.length; i++) {
+      damage += damages[i] * k
     }
 
-    return damage
+    return Math.floor(damage)
   }
 }

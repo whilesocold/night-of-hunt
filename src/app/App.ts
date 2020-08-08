@@ -6,7 +6,6 @@ import { ResourceManager, ResourceManagerEvent } from './utils/resources/Resourc
 import { ResourcesConfig } from './Resources'
 import { RequestManager } from './utils/RequestManager'
 import { DataStorage } from './utils/DataStorage'
-import { BattleSkillComboType } from './data/BattleSkillComboType'
 import { BattleScreen } from './components/battle/BattleScreen'
 import { GameEvent } from './data/GameEvent'
 
@@ -74,19 +73,6 @@ export class App {
     })
   }
 
-  private async onSkillDown(card: number, comboType: BattleSkillComboType = null): Promise<void> {
-    console.log(card)
-
-    this.requestManager.once('attack', data => {
-      EventBus.emit(GameEvent.BattleAttack, State)
-    })
-
-    await this.requestManager.request({
-      command: 'attack',
-      card: card,
-    })
-  }
-
   public async init(props: AppInitOptions = { debugMode: false }): Promise<void> {
     console.log('App::init() -', props)
 
@@ -117,8 +103,30 @@ export class App {
 
     window.addEventListener('resize', () => this.onResize())
 
+    this.initGameEvents()
+
     this.onUpdate(1)
     this.onResize()
+  }
+
+  private initGameEvents(): void {
+    EventBus.on(GameEvent.BattleAttack, async (index: number) => {
+      this.requestManager.once('attack', data => {
+        State.set(data)
+        EventBus.emit(GameEvent.BattlePlayerTurnStarting, State)
+      })
+
+      await this.requestManager.request({
+        command: 'attack',
+        card: index,
+      })
+    })
+
+    EventBus.on(GameEvent.BattleEnemyTurnEnding, () => {
+      if (State.has('reward')) {
+        this.stage.removeChild(this.screen)
+      }
+    })
   }
 
   private onUpdate(dt: number): void {

@@ -30,4 +30,8 @@ export class BattleHealth extends PIXI.Container {
     this.addChild(this.sprite)
     this.addChild(this.label)
   }
+
+  public setValue(value: number): void {
+    this.label.text = value.toString()
+  }
 }

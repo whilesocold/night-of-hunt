@@ -17,4 +17,8 @@ export class BattleUserPhoto extends PIXI.Container {
     this.addChild(this.back)
     this.addChild(this.front)
   }
+
+  public getPhoto(): PIXI.Sprite {
+    return this.front
+  }
 }

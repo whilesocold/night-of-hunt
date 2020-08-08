@@ -28,7 +28,7 @@ export class BattleSkill extends PIXI.Container {
 
     this.skillIcon = new PIXI.Sprite(ResourceManager.instance.getTexture('skill_' + skillId + '.png') || PIXI.Texture.WHITE)
     this.skillIcon.anchor.set(0.5)
-    this.skillIcon.position.set(this.skillIcon.width / 2, 0)
+    //this.skillIcon.position.set(this.skillIcon.width / 2, 0)
 
     this.digContainer = new PIXI.Container()
 
@@ -53,10 +53,9 @@ export class BattleSkill extends PIXI.Container {
     this.digContainer.addChild(this.digSchoolIcon)
     this.digContainer.addChild(this.digDamageLabel)
 
-    this.digBackIcon.x = this.skillIcon.width / 2
     this.digBackIcon.y = this.skillIcon.height / 2 - 10
 
-    this.digContainer.x = this.digBackIcon.x -this.digContainer.width / 2
+    this.digContainer.x = -this.digContainer.width / 2
     this.digContainer.y = this.digBackIcon.y
   }
 }

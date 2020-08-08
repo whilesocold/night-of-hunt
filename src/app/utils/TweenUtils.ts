@@ -18,7 +18,11 @@ export class TweenUtils {
     })
   }
 
-  static async bossDamage(obj: any): Promise<void> {
+  static enemyStand(obj: any): void {
+    TweenMax.to(obj.scale, 0.75, { x: 1, y: 1.02, repeat: -1, yoyo: true })
+  }
+
+  static async enemyDamage(obj: any): Promise<void> {
     return new Promise(resolve => {
       let x = obj.x
       let margin = 15
@@ -35,7 +39,7 @@ export class TweenUtils {
     })
   }
 
-  static async bossAttack(obj: any): Promise<void> {
+  static async attackToEnemy(obj: any): Promise<void> {
     return new Promise(resolve => {
       TweenMax.to(obj.scale, 0.2, {
         x: 1.15, y: 1.15, onComplete: () => {

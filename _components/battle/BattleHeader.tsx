@@ -76,7 +76,7 @@ export class BattleHeader extends Component<any, any> {
     this.setState(state)
 
     TweenUtils.photoDamage(this.bossPhotoRef.getPhoto())
-    TweenUtils.bossDamage(this.bossRef)
+    TweenUtils.enemyDamage(this.bossRef)
 
     if (this.bossRef) {
       setTimeout(async () => {
@@ -89,7 +89,7 @@ export class BattleHeader extends Component<any, any> {
           bossProgress: this.state.bossProgress,
         })
 
-        TweenUtils.bossAttack(this.bossRef)
+        TweenUtils.attackToEnemy(this.bossRef)
         await TweenUtils.photoDamage(this.userPhotoRef.getPhoto())
       }, 2 * 1000)
     }
