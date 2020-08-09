@@ -55,8 +55,10 @@ export class BattleLog extends PIXI.Container {
       const item = new BattleLogItem(
         newLog.schools[0],
         newLog.damage,
+        newLog.dead,
         newLog.enemySchools[0],
-        newLog.enemyDamage)
+        newLog.enemyDamage,
+        newLog.enemyDead)
 
       TweenMax.to(item.scale, 0.25, { x: 1.25, y: 1.25 })
 
@@ -77,8 +79,10 @@ export class BattleLog extends PIXI.Container {
       const item = new BattleLogItem(
         newLog.schools[0],
         newLog.damage,
+        newLog.dead,
         newLog.enemySchools[0],
-        newLog.enemyDamage)
+        newLog.enemyDamage,
+        newLog.enemyDead)
 
       if (i === 0) {
         item.scale.set(1.25)

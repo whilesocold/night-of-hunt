@@ -122,11 +122,13 @@ export class App {
       })
     })
 
+    /*
     EventBus.on(GameEvent.BattleEnemyTurnEnding, () => {
       if (State.has('reward')) {
         this.stage.removeChild(this.screen)
       }
     })
+     */
   }
 
   private onUpdate(dt: number): void {

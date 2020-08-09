@@ -1,7 +1,7 @@
 export default {
   'autoUpdate': true,
   'alpha': {
-    'start': 0.35,
+    'start': 0.3,
     'end': 0.1,
   },
   'scale': {

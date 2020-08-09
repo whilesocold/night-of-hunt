@@ -37,7 +37,7 @@ export class BattleHealthbar extends PIXI.Container {
     const currentWidth = Utils.remap(value, 0, 100, 0, this.size.width - 2)
 
     this.front.clear()
-    this.front.beginFill(0xff0000)
+    this.front.beginFill(0x00ff00)
     this.front.drawRect(1, 1, currentWidth, this.size.height - 2)
     this.front.endFill()
 
@@ -45,7 +45,7 @@ export class BattleHealthbar extends PIXI.Container {
       this.tweenObject.width = currentWidth
 
       this.back.clear()
-      this.back.beginFill(0x00ff00)
+      this.back.beginFill(0xff0000)
       this.back.drawRect(1, 1, currentWidth, this.size.height - 2)
       this.back.endFill()
 
@@ -53,7 +53,7 @@ export class BattleHealthbar extends PIXI.Container {
       TweenMax.to(this.tweenObject, 1, {
         width: currentWidth, onUpdate: (e) => {
           this.back.clear()
-          this.back.beginFill(0x00ff00)
+          this.back.beginFill(0xff0000)
           this.back.drawRect(1, 1, this.tweenObject.width, this.size.height - 2)
           this.back.endFill()
         },

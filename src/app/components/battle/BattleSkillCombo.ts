@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js'
+import { gsap, TweenMax } from 'gsap'
 
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 import { BattleSkillColor } from './BattleSkill'
@@ -109,7 +110,7 @@ export class BattleSkillCombo extends PIXI.Container {
     this.digContainer.addChild(this.digSchoolIcon)
     this.digContainer.addChild(this.digDamageLabel)
 
-    this.digBackIcon.x = index === 0 ? this.skillIcons[0].width / 2 :  -this.skillIcons[0].width/2
+    this.digBackIcon.x = index === 0 ? this.skillIcons[0].width / 2 : -this.skillIcons[0].width / 2
     this.digBackIcon.y = this.skillIcons[0].height / 2 - 10
 
     this.digContainer.x = this.digBackIcon.x - this.digContainer.width / 2
@@ -118,6 +119,20 @@ export class BattleSkillCombo extends PIXI.Container {
     this.delimiterIcon.x = this.digBackIcon.x
     this.comboIcon.x = this.digBackIcon.x
     this.glowIcon.x = this.digBackIcon.x
+
+    this.startGlowAnimation()
+
+    this.on('removed', () => {
+      this.stopGlowAnimation()
+    })
+  }
+
+  public startGlowAnimation(): void {
+    TweenMax.to(this.glowIcon.scale, 0.5, { x: 1.15, y: 1.15, repeat: -1, yoyo: true })
+  }
+
+  public stopGlowAnimation(): void {
+    gsap.killTweensOf(this.glowIcon.scale)
   }
 
   public async animateShow(time: number = 1): Promise<void> {

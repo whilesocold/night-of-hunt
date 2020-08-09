@@ -12,6 +12,8 @@ export class MaskingEffect extends PIXI.Container {
     this.addChild(this.container)
 
     this.emitter = new PIXIParticles.Emitter(this.container, images, config)
+
+    this.on('removed', () => this.release())
   }
 
   release(): void {

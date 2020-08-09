@@ -15,6 +15,7 @@ export class BattleSkills extends PIXI.Container {
   protected canEnableSkills: boolean
 
   protected onPlayerTurnStartingBind: (state) => void
+  protected onBattleEnemyTurnEndingBind: (state) => void
   protected onTurnWaitingBind: (state) => void
 
   constructor() {
@@ -42,14 +43,22 @@ export class BattleSkills extends PIXI.Container {
     this.initFromState()
 
     this.onPlayerTurnStartingBind = this.onPlayerTurnStarting.bind(this)
+    this.onBattleEnemyTurnEndingBind = this.onBattleEnemyTurnEnding.bind(this)
     this.onTurnWaitingBind = this.onTurnWaiting.bind(this)
 
     EventBus.on(GameEvent.BattlePlayerTurnStarting, this.onPlayerTurnStartingBind)
+    EventBus.on(GameEvent.BattleEnemyTurnEnding, this.onBattleEnemyTurnEndingBind)
     EventBus.on(GameEvent.BattleTurnWaiting, this.onTurnWaitingBind)
   }
 
   protected onPlayerTurnStarting(state): void {
     this.initFromState()
+  }
+
+  protected onBattleEnemyTurnEnding(state): void {
+    if (State.has('reward')) {
+      this.disableSkills()
+    }
   }
 
   protected onTurnWaiting(state): void {
@@ -194,7 +203,7 @@ export class BattleSkills extends PIXI.Container {
     const targetSkill = indexA === 0 ? skillB : skillA
     const targetPosition = indexA === 0 ? skillA.x + skillA.width : skillB.x - skillB.width
 
-    TweenMax.to(targetSkill, 0.5, { x: targetPosition })
+    TweenMax.to(targetSkill, 0.5, { x: targetPosition, alpha: 0 })
 
     setTimeout(async () => {
       await this.addSkill(skillIds, schoolId, BattleDataUtils.getDamage(damages), indexA === 0 ? 0 : 1, this.getSkillPosition(indexA === 0 ? 0 : 2))
@@ -215,8 +224,8 @@ export class BattleSkills extends PIXI.Container {
 
     this.skills.splice(0, 3)
 
-    TweenMax.to(skillA, 0.5, { x: skillB.x - skillA.width })
-    TweenMax.to(skillC, 0.5, { x: skillB.x + skillC.width })
+    TweenMax.to(skillA, 0.5, { x: skillB.x - skillA.width, alpha: 0 })
+    TweenMax.to(skillC, 0.5, { x: skillB.x + skillC.width, alpha: 0 })
 
     setTimeout(async () => {
       await this.addSkill(skillIds, schoolId, BattleDataUtils.getDamage(damages), 0, this.getSkillPosition(1))
@@ -287,11 +296,13 @@ export class BattleSkills extends PIXI.Container {
 
   protected onSkillPointerDown(index: number): void {
     const skill = this.skills.find(skill => skill.index === index)
+    const card = skill instanceof BattleSkill ? skill.index + 1 : 0
+
     this.removeSkill(index)
       .then(() => {
         this.disableSkills()
 
-        EventBus.emit(GameEvent.BattleAttack, skill instanceof BattleSkill ? skill.index + 1 : 0)
+        EventBus.emit(GameEvent.BattleAttack, card)
       })
   }
 }

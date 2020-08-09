@@ -18,6 +18,8 @@ import { DamageLabelEffect } from '../effects/DamageLabelEffect'
 import RainEffectConfig from '../../configs/effects/RainEffectConfig'
 
 export class BattleHeader extends PIXI.Container {
+  protected turnTime: number = 0.25
+
   protected userState: BattleUserState
   protected enemyState: BattleUserState
 
@@ -190,21 +192,32 @@ export class BattleHeader extends PIXI.Container {
     this.enemyHealth.setValue(enemyState.currentHealth)
     this.enemyHealthbar.setValue(enemyState.currentHealthPercent)
 
-    this.enemyDamageEffect.position.set(this.back.width / 2, this.back.height / 2)
+    const damageEffectMargin = 50
+    const damageEffectOffset = new PIXI.Point(
+      Utils.randomRange(-damageEffectMargin, damageEffectMargin),
+      Utils.randomRange(-damageEffectMargin, damageEffectMargin))
+
+    const damageLabelEffectSize = 0.35 * fightLog[0].schools.length
+
     this.enemyDamageEffect.setFrames('blood_splash_' + Utils.randomRange(2, 2) + '_png',
       512,
       512,
       15)
+    this.enemyDamageEffect.position.set(
+      this.back.width / 2 + damageEffectOffset.x,
+      this.back.height / 2 + damageEffectOffset.y)
     this.enemyDamageEffect.play()
 
     if (fightLog.length > 0) {
-      this.enemyDamageLabelEffect.position.set(this.back.width / 2, this.back.height / 2)
-      this.enemyDamageLabelEffect.show(fightLog[0].damage, 1)
+      this.enemyDamageLabelEffect.position.set(
+        this.back.width / 2 + damageEffectOffset.x,
+        this.back.height / 2 + damageEffectOffset.y)
+      this.enemyDamageLabelEffect.show(fightLog[0].damage, damageLabelEffectSize)
     }
 
     setTimeout(() => {
       EventBus.emit(GameEvent.BattlePlayerTurnEnding, state)
-    }, 1000)
+    }, this.turnTime * 1000)
   }
 
   protected onBattlePlayerTurnEnding(state): void {
@@ -214,7 +227,7 @@ export class BattleHeader extends PIXI.Container {
 
     setTimeout(() => {
       EventBus.emit(GameEvent.BattleEnemyTurnStarting, state)
-    }, 500)
+    }, this.turnTime * 1000)
   }
 
   protected onBattleEnemyTurnStarting(state): void {
@@ -222,6 +235,7 @@ export class BattleHeader extends PIXI.Container {
 
     const userState = state.get('user')
 
+    TweenUtils.attackToEnemy(this.enemy)
     TweenUtils.photoDamage(this.userPhoto.getPhoto())
 
     this.userHealth.setValue(userState.currentHealth)
@@ -229,12 +243,17 @@ export class BattleHeader extends PIXI.Container {
 
     setTimeout(() => {
       EventBus.emit(GameEvent.BattleEnemyTurnEnding, state)
-    }, 1000)
+    }, this.turnTime * 1000)
   }
 
   protected onBattleEnemyTurnEnding(state): void {
     console.log('onBattleEnemyTurnEnding', state)
 
-    EventBus.emit(GameEvent.BattleTurnWaiting, state)
+    if (State.has('reward')) {
+      EventBus.emit(GameEvent.BattleWinning, state)
+
+    } else {
+      EventBus.emit(GameEvent.BattleTurnWaiting, state)
+    }
   }
 }

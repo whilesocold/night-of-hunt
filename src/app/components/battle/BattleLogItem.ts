@@ -3,7 +3,7 @@ import * as PIXI from 'pixi.js'
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 
 export class BattleLogItem extends PIXI.Container {
-  constructor(userSchool: number, userDamage: number, enemySchool: number, enemyDamage: number) {
+  constructor(userSchool: number, userDamage: number, userDead: boolean, enemySchool: number, enemyDamage: number, enemyDead: boolean) {
     super()
 
     const userSchoolTexture = ResourceManager.instance.getTexture('fight_my_log_school_' + userSchool + '.png')
@@ -23,7 +23,7 @@ export class BattleLogItem extends PIXI.Container {
     schoolSprite.x = -100
     schoolSprite.anchor.set(1, 0.5)
 
-    const userDamageText = new PIXI.Text(userDamage.toString(), {
+    const userDamageText = new PIXI.Text(userDead ? 'Убит' : (userDamage > 0 ? userDamage.toString() : ''), {
       fontFamily: 'Munchkin-fnt',
       fontSize: 14,
       fill: 0x3ead02,
@@ -34,7 +34,7 @@ export class BattleLogItem extends PIXI.Container {
     const logSprite = new PIXI.Sprite(logTexture)
     logSprite.anchor.set(0.5, 0.5)
 
-    const enemyDamageText = new PIXI.Text(enemyDamage > 0 ? enemyDamage.toString(): '', {
+    const enemyDamageText = new PIXI.Text(enemyDead ? 'Убит' : (enemyDamage > 0 ? enemyDamage.toString(): ''), {
       fontFamily: 'Munchkin-fnt',
       fontSize: 14,
       fill: 0xa12625,
