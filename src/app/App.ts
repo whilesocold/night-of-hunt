@@ -80,16 +80,12 @@ export class App {
     await this.loadResources(ResourcesConfig)
     await this.connectToServer('wss://ohota.mobi/ws/fightBoss;jsessionid=' + State.get('sessionId') + '?bossId=' + State.get('bossId'))
 
-    this.width = 460
-
     this.canvas = document.getElementById('canvas') as HTMLCanvasElement
     this.app = new PIXI.Application({
       backgroundColor: 0x000000,
       view: this.canvas,
-      width: this.width,
-      height: 800,
       antialias: true,
-      resolution: window.devicePixelRatio,
+      resolution: 2,//window.devicePixelRatio,
       resizeTo: window,
     })
 
@@ -138,8 +134,12 @@ export class App {
   }
 
   private onResize(): void {
+    const width = this.app.renderer.width
+    const height = this.app.renderer.height
+    const resolution = this.app.renderer.resolution
+
     if (this.screen) {
-      this.screen.resize(window.innerWidth, window.innerHeight)
+      this.screen.resize(width / resolution, height / resolution, resolution)
     }
   }
 
