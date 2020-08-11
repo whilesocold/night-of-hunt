@@ -21,7 +21,7 @@ export class BattleSkillCombo extends PIXI.Container {
   public damage: number
   public index: number
 
-  constructor(skillIds: number[], schoolId: number, damage: number, index: number) {
+  constructor(skillIds: number[], schoolId: number, damage: number, index: number, now: boolean = false) {
     super()
 
     const digOffset = 4
@@ -93,6 +93,14 @@ export class BattleSkillCombo extends PIXI.Container {
 
     this.comboIcon = new PIXI.Sprite(ResourceManager.instance.getTexture('combo.png'))
     this.comboIcon.anchor.set(0.5, 0.5)
+    this.comboIcon.alpha = 0
+
+    if (!now) {
+      TweenMax.to(this.comboIcon, 0.75, { delay: 0.25, alpha: 1 })
+
+    } else {
+      this.comboIcon.alpha = 1
+    }
 
     this.delimiterIcon = new PIXI.Sprite(ResourceManager.instance.getTexture('school_back_' + schoolId + '.png'))
     this.delimiterIcon.anchor.set(0.5, 0.5)

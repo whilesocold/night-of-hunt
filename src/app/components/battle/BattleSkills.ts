@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { TweenMax } from 'gsap'
+import _ from 'underscore'
 
 import { BattleSkill } from './BattleSkill'
 import { BattleSkillCombo } from './BattleSkillCombo'
@@ -80,6 +81,8 @@ export class BattleSkills extends PIXI.Container {
   }
 
   protected initFromState(): void {
+    const previousSkills = _.clone(this.skills)
+
     while (this.container.children.length > 0) {
       this.container.removeChildAt(0)
     }
@@ -95,7 +98,9 @@ export class BattleSkills extends PIXI.Container {
       const index = this.skills.length
       const x = this.getSkillPosition(index)
 
-      this.addSkill([groupData.id], groupData.school, groupData.damage, index, x)
+      console.log('exist', this.isExistSkill(previousSkills, groupData.id), this.skills)
+
+      this.addSkill([groupData.id], groupData.school, groupData.damage, index, x, this.isExistSkill(previousSkills, groupData.id))
     }
 
     const skillGroups = this.getSkillGroups(this.skills)
@@ -111,7 +116,8 @@ export class BattleSkills extends PIXI.Container {
           [skillGroup[0].index, skillGroup[1].index],
           [skillGroup[0].skillId, skillGroup[1].skillId],
           skillGroup[0].schoolId,
-          [skillGroup[0].damage, skillGroup[1].damage])
+          [skillGroup[0].damage, skillGroup[1].damage],
+          this.isExistSkillGroup(previousSkills, [skillGroup[0].skillId, skillGroup[1].skillId]))
 
 
       } else if (skillGroup.length === 3) {
@@ -119,9 +125,20 @@ export class BattleSkills extends PIXI.Container {
           [skillGroup[0].index, skillGroup[1].index, skillGroup[2].index],
           [skillGroup[0].skillId, skillGroup[1].skillId, skillGroup[2].skillId],
           skillGroup[0].schoolId,
-          [skillGroup[0].damage, skillGroup[1].damage, skillGroup[2].damage])
+          [skillGroup[0].damage, skillGroup[1].damage, skillGroup[2].damage],
+          this.isExistSkillGroup(previousSkills, [skillGroup[0].skillId, skillGroup[1].skillId, skillGroup[2].skillId]))
       }
     }
+  }
+
+  protected isExistSkill(previousSkills: any, skillId: number): boolean {
+    return previousSkills.find(skill => skill instanceof BattleSkill && skill.skillId === skillId) !== null
+  }
+
+  protected isExistSkillGroup(previousSkills: any, skillIds: number[]): boolean {
+    const combo = previousSkills.find(skill => skill instanceof BattleSkillCombo || skill instanceof BattleSkillSuperCombo)
+
+    return combo && _.isEqual(skillIds, combo.skillIds)
   }
 
   protected getSkillGroups(skills: any): any {
@@ -155,7 +172,7 @@ export class BattleSkills extends PIXI.Container {
     return result
   }
 
-  public async addSkill(skillIds: number[], schoolId: number, damage: number, index: number, x: number): Promise<void> {
+  public async addSkill(skillIds: number[], schoolId: number, damage: number, index: number, x: number, now: boolean = false): Promise<void> {
     return new Promise(resolve => {
       let skill = null
 
@@ -163,35 +180,40 @@ export class BattleSkills extends PIXI.Container {
         skill = new BattleSkill(skillIds[0], schoolId, damage, index)
 
       } else if (skillIds.length === 2) {
-        skill = new BattleSkillCombo(skillIds, schoolId, damage, index)
+        skill = new BattleSkillCombo(skillIds, schoolId, damage, index, now)
 
       } else if (skillIds.length === 3) {
-        skill = new BattleSkillSuperCombo(skillIds, schoolId, damage, index)
+        skill = new BattleSkillSuperCombo(skillIds, schoolId, damage, index, now)
       }
 
       if (!skill) {
         return resolve()
       }
 
-      skill.alpha = 0
+      skill.alpha = now ? 1 : 0
       skill.x = x
 
       this.skills.push(skill)
       this.container.addChild(skill)
 
-      TweenMax.to(skill, 1, {
-        alpha: 1, onComplete: () => {
-          skill.buttonMode = this.canEnableSkills
-          skill.interactive = this.canEnableSkills
-          skill.on('pointerdown', () => this.onSkillPointerDown(index))
+      const handleOnComplete = () => {
+        skill.buttonMode = this.canEnableSkills
+        skill.interactive = this.canEnableSkills
+        skill.on('pointerdown', () => this.onSkillPointerDown(index))
 
-          resolve()
-        },
-      })
+        resolve()
+      }
+
+      if (now) {
+        handleOnComplete()
+
+      } else {
+        TweenMax.to(skill, 1, { alpha: 1, onComplete: () => handleOnComplete() })
+      }
     })
   }
 
-  public async morphSkillsToCombo2(indices: number [], skillIds: number[], schoolId: number, damages: number[]): Promise<void> {
+  public async morphSkillsToCombo2(indices: number [], skillIds: number[], schoolId: number, damages: number[], now: boolean = false): Promise<void> {
     const indexA = indices[0]
     const indexB = indices[1]
 
@@ -201,19 +223,34 @@ export class BattleSkills extends PIXI.Container {
     this.skills.splice(indexA, 2)
 
     const targetSkill = indexA === 0 ? skillB : skillA
+    const otherSkill = indexA === 0 ? skillA : skillB
     const targetPosition = indexA === 0 ? skillA.x + skillA.width : skillB.x - skillB.width
 
-    TweenMax.to(targetSkill, 0.5, { x: targetPosition, alpha: 0 })
+    if (now) {
+      targetSkill.x = targetPosition
+      targetSkill.alpha = 0
 
-    setTimeout(async () => {
-      await this.addSkill(skillIds, schoolId, BattleDataUtils.getDamage(damages), indexA === 0 ? 0 : 1, this.getSkillPosition(indexA === 0 ? 0 : 2))
+      this.addSkill(skillIds, schoolId, BattleDataUtils.getDamage(damages), indexA === 0 ? 0 : 1, this.getSkillPosition(indexA === 0 ? 0 : 2), true)
 
       this.container.removeChild(skillA)
       this.container.removeChild(skillB)
-    }, 250)
+
+    } else {
+      TweenMax.to(targetSkill, 0.5, { x: targetPosition })
+
+      setTimeout(async () => {
+        TweenMax.to(targetSkill, 0.2, { delay: 0.15, alpha: 0 })
+        TweenMax.to(otherSkill, 0.2, { delay: 0.15, alpha: 0 })
+
+        await this.addSkill(skillIds, schoolId, BattleDataUtils.getDamage(damages), indexA === 0 ? 0 : 1, this.getSkillPosition(indexA === 0 ? 0 : 2))
+
+        this.container.removeChild(skillA)
+        this.container.removeChild(skillB)
+      }, 500)
+    }
   }
 
-  public async morphSkillsToCombo3(indices: number [], skillIds: number[], schoolId: number, damages: number[]): Promise<void> {
+  public async morphSkillsToCombo3(indices: number [], skillIds: number[], schoolId: number, damages: number[], now: boolean = false): Promise<void> {
     const indexA = indices[0]
     const indexB = indices[1]
     const indexC = indices[2]
@@ -224,16 +261,35 @@ export class BattleSkills extends PIXI.Container {
 
     this.skills.splice(0, 3)
 
-    TweenMax.to(skillA, 0.5, { x: skillB.x - skillA.width, alpha: 0 })
-    TweenMax.to(skillC, 0.5, { x: skillB.x + skillC.width, alpha: 0 })
+    if (now) {
+      skillA.x = skillB.x - skillA.width
+      skillA.alpha = 0
 
-    setTimeout(async () => {
-      await this.addSkill(skillIds, schoolId, BattleDataUtils.getDamage(damages), 0, this.getSkillPosition(1))
+      skillC.x = skillB.x + skillC.width
+      skillC.alpha = 0
+
+      this.addSkill(skillIds, schoolId, BattleDataUtils.getDamage(damages), 0, this.getSkillPosition(1), true)
 
       this.container.removeChild(skillA)
       this.container.removeChild(skillB)
       this.container.removeChild(skillC)
-    }, 250)
+
+    } else {
+      TweenMax.to(skillA, 0.5, { x: skillB.x - skillA.width })
+      TweenMax.to(skillC, 0.5, { x: skillB.x + skillC.width })
+
+      setTimeout(async () => {
+        TweenMax.to(skillA, 0.2, { delay: 0.15, alpha: 0 })
+        TweenMax.to(skillB, 0.2, { delay: 0.15, alpha: 0 })
+        TweenMax.to(skillC, 0.2, { delay: 0.15, alpha: 0 })
+
+        await this.addSkill(skillIds, schoolId, BattleDataUtils.getDamage(damages), 0, this.getSkillPosition(1))
+
+        this.container.removeChild(skillA)
+        this.container.removeChild(skillB)
+        this.container.removeChild(skillC)
+      }, 500)
+    }
   }
 
   public async removeSkill(index: number): Promise<void> {
