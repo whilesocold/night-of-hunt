@@ -41,7 +41,7 @@ export class BattleSkills extends PIXI.Container {
 
      */
     //this.rearrangeSkills(true)
-    this.initFromState()
+    setTimeout(() => this.initFromState(), 500)
 
     this.onPlayerTurnStartingBind = this.onPlayerTurnStarting.bind(this)
     this.onBattleEnemyTurnEndingBind = this.onBattleEnemyTurnEnding.bind(this)
@@ -275,8 +275,8 @@ export class BattleSkills extends PIXI.Container {
       this.container.removeChild(skillC)
 
     } else {
-      TweenMax.to(skillA, 0.5, { x: skillB.x - skillA.width })
-      TweenMax.to(skillC, 0.5, { x: skillB.x + skillC.width })
+      TweenMax.to(skillA, 0.5, { x: skillB.x - skillA.width + 5 })
+      TweenMax.to(skillC, 0.5, { x: skillB.x + skillC.width - 5 })
 
       setTimeout(async () => {
         TweenMax.to(skillA, 0.2, { delay: 0.15, alpha: 0 })

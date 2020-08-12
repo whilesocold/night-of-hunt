@@ -61,13 +61,13 @@ export class BattleSkillCombo extends PIXI.Container {
 
       } else if (skillIds.length === 3) {
         if (i === 0) {
-          skillIcon.x = -skillIcon.width
+          skillIcon.x = -skillIcon.width + 5
 
         } else if (i === 1) {
           skillIcon.x = 0
 
         } else if (i === 2) {
-          skillIcon.x = skillIcon.width
+          skillIcon.x = skillIcon.width - 5
         }
       }
 

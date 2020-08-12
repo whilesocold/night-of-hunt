@@ -30,8 +30,8 @@ export class BattleSkillSuperCombo extends BattleSkillCombo {
     this.digBackIcon.x = 0
     this.digContainer.x = this.digBackIcon.x - this.digContainer.width / 2
 
-    this.delimiterIcon.x = -this.skillIcons[0].width / 2
-    this.delimiterSecondIcon.x = this.skillIcons[0].width / 2
+    this.delimiterIcon.x = -this.skillIcons[0].width / 2 + 2
+    this.delimiterSecondIcon.x = this.skillIcons[0].width / 2 - 2
 
     this.comboIcon.x = this.digBackIcon.x
     this.glowIcon.x = this.digBackIcon.x
