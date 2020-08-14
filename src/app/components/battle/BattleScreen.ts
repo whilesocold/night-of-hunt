@@ -23,34 +23,27 @@ export class BattleScreen extends PIXI.Container {
 
     this.header = new BattleHeader()
     this.skills = new BattleSkills()
+    this.skills.scale.set(0.9)
     this.log = new BattleLog()
 
     this.addChild(this.back)
-    this.container.addChild(this.header)
-    this.container.addChild(this.log)
+
     this.container.addChild(this.skills)
+    this.container.addChild(this.log)
+    this.container.addChild(this.header)
 
     this.addChild(this.container)
   }
 
-  resize(width: number, height: number, ratio: number): void {
-    this.header.y = 0
-    this.skills.x = this.header.width / 2
-    this.skills.y = this.header.y + this.header.height + 80
-    this.log.x = this.header.width / 2
-    this.log.y = this.skills.y + 80
+  resize(width: number, height: number, resolution: number): void {
+    this.header.x = Math.max(0, (width - this.header.width) / 2)
+    this.header.resize(width, height, resolution)
 
-    console.log(ratio)
+    this.skills.x = width / 2
+    this.skills.y = this.header.y + this.header.height + 47
 
-    this.container.scale.set(Math.min(width / 460, height / 750) / ratio)
-
-    const local = this.toLocal(new PIXI.Point(
-      width / 2 / ratio,
-      0), this.parent)
-
-    this.container.position.set(
-      local.x - this.container.width / 2 ,
-      local.y )
+    this.log.x = width / 2
+    this.log.y = this.skills.y + 53
   }
 
   update(dt: number): void {

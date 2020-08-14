@@ -67,7 +67,7 @@ export class BattleSkills extends PIXI.Container {
   }
 
   protected getSkillPosition(index: number): number {
-    const margin = 40
+    const margin = 20
     const skillWidth = 96
 
     if (index === 0) {

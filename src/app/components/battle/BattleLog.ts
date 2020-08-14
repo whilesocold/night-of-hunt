@@ -10,6 +10,7 @@ export class BattleLog extends PIXI.Container {
   protected container: PIXI.Container
 
   protected items: BattleLogItem[]
+  protected itemsMax: number
 
   protected onBattlePlayerTurnStartingBind: (state) => void
 
@@ -17,6 +18,7 @@ export class BattleLog extends PIXI.Container {
     super()
 
     this.items = []
+    this.itemsMax = 3
 
     this.headerLabel = new PIXI.Text('Журнал боя', {
       fontFamily: 'Munchkin-fnt',
@@ -28,7 +30,7 @@ export class BattleLog extends PIXI.Container {
     this.addChild(this.headerLabel)
 
     this.container = new PIXI.Container()
-    this.container.position.set(0, this.headerLabel.height + 35)
+    this.container.position.set(0, this.headerLabel.height + 18)
     this.addChild(this.container)
 
     this.initFromState()
@@ -45,10 +47,8 @@ export class BattleLog extends PIXI.Container {
     console.log('-------- fightLog', fightLog)
 
     if (fightLog.length > this.items.length) {
-      if (this.items.length > 0) {
-        const previousItem = this.items[0]
-
-        TweenMax.to(previousItem.scale, 0.25, { x: 1, y: 1 })
+      for (let i = 0; i < this.items.length; i++) {
+        TweenMax.to(this.items[i].scale, 0.25, { x: 0.9, y: 0.9 })
       }
 
       const newLog = fightLog[0]
@@ -60,7 +60,7 @@ export class BattleLog extends PIXI.Container {
         newLog.enemyDamage,
         newLog.enemyDead)
 
-      TweenMax.to(item.scale, 0.25, { x: 1.25, y: 1.25 })
+      TweenMax.to(item.scale, 0.25, { x: 1.05, y: 1.05 })
 
       this.addItem(item, true)
     }
@@ -72,7 +72,7 @@ export class BattleLog extends PIXI.Container {
 
   initFromState(): void {
     const userState = State.get('user')
-    const fightLog = userState.fightLog
+    const fightLog = userState.fightLog.slice(0, this.itemsMax)
 
     for (let i = 0; i < fightLog.length; i++) {
       const newLog = fightLog[i]
@@ -85,7 +85,10 @@ export class BattleLog extends PIXI.Container {
         newLog.enemyDead)
 
       if (i === 0) {
-        item.scale.set(1.25)
+        item.scale.set(1.05)
+
+      } else {
+        item.scale.set(0.9)
       }
 
       this.addItem(item)
@@ -97,12 +100,20 @@ export class BattleLog extends PIXI.Container {
   }
 
   addItem(item: BattleLogItem, toStart: boolean = false): void {
-    const offset = 15
+    const offset = 8
 
     if (toStart) {
+      if (this.items.length === this.itemsMax) {
+        this.container.removeChild(this.items.pop())
+      }
+
       this.items.unshift(item)
 
     } else {
+      if (this.items.length === this.itemsMax) {
+        this.container.removeChild(this.items.shift())
+      }
+
       this.items.push(item)
     }
 

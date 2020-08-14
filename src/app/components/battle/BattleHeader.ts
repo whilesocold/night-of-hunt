@@ -256,4 +256,36 @@ export class BattleHeader extends PIXI.Container {
       EventBus.emit(GameEvent.BattleTurnWaiting, state)
     }
   }
+
+  public resize(width: number, height: number, resolution: number): void {
+    width = Math.min(width, this.back.width)
+
+    this.enemy.position.set(this.back.width / 2, this.back.height + this.container.y + 50)
+
+    this.enemyBack.clear()
+    this.enemyBack.beginFill(0x000000, 0.5)
+    this.enemyBack.drawRect(0, 0, width, 39)
+    this.enemyBack.endFill()
+
+    this.userBack.clear()
+    this.userBack.beginFill(0x000000, 0.5)
+    this.userBack.drawRect(0, 0, width, 39)
+    this.userBack.endFill()
+
+    this.userBack.position.set(0, this.container.y + this.back.height)
+
+    this.userPhoto.position.set(0, this.userBack.y)
+
+    this.enemyName.position.set(50, 22)
+    this.userName.position.set(50, this.userBack.y + 15)
+
+    this.enemyHealth.position.set(this.enemyBack.width - 69, 22)
+    this.userHealth.position.set(this.userBack.width - 69, this.userBack.y + 15)
+
+    this.enemyHealthbar.position.set(this.enemyPhoto.x + this.enemyPhoto.width, 0)
+    this.enemyHealthbar.resize(width - (this.enemyPhoto.x + this.enemyPhoto.width) - 1, 6)
+
+    this.userHealthbar.position.set(this.userPhoto.x + this.userPhoto.width, this.userBack.y + this.userBack.height - 8)
+    this.userHealthbar.resize(width - (this.userPhoto.x + this.userPhoto.width) - 1, 8)
+  }
 }

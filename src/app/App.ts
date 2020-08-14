@@ -139,6 +139,7 @@ export class App {
     const resolution = this.app.renderer.resolution
 
     if (this.screen) {
+      this.screen.scale.set(0.5)
       this.screen.resize(width / resolution, height / resolution, resolution)
     }
   }

@@ -10,27 +10,33 @@ export class BattleHealthbar extends PIXI.Container {
   protected tweenObject: any
 
   protected size: { width: number, height: number }
+  protected value: number
 
   constructor(value: number, width: number, height: number) {
     super()
 
-    this.size = { width: width, height: height }
-    this.tweenObject = { width: 0 }
-
-
     this.back = new PIXI.Graphics()
     this.front = new PIXI.Graphics()
-
     this.frame = new PIXI.Graphics()
-    this.frame.lineStyle(1, 0x423b32)
-    this.frame.drawRect(0, 0, width, height)
-    this.frame.endFill()
 
     this.addChild(this.back)
     this.addChild(this.front)
     this.addChild(this.frame)
 
+    this.resize(width, height)
     this.setValue(value, true)
+  }
+
+  public resize(width: number, height: number) : void {
+    this.size = { width: width, height: height }
+    this.tweenObject = { width: 0 }
+
+    this.frame.clear()
+    this.frame.lineStyle(1, 0x423b32)
+    this.frame.drawRect(0, 0, width, height)
+    this.frame.endFill()
+
+    this.setValue(this.value, true)
   }
 
   public setValue(value: number, now: boolean = false): void {
@@ -59,5 +65,7 @@ export class BattleHealthbar extends PIXI.Container {
         },
       })
     }
+
+    this.value = value
   }
 }
