@@ -98,6 +98,7 @@ export class App {
     this.ticker.add((dt) => this.onUpdate(dt))
 
     window.addEventListener('resize', () => this.onResize())
+    window.addEventListener('orientationchange', () => this.onResize())
 
     this.initGameEvents()
 
