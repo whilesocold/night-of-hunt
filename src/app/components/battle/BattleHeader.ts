@@ -66,66 +66,35 @@ export class BattleHeader extends PIXI.Container {
     this.enemyState = State.get('enemy')
 
     this.back = new PIXI.Sprite(ResourceManager.instance.getTexture('back7.jpg'))
+    this.back.anchor.set(0.5, 0)
 
     this.container = new PIXI.Container()
     this.container.position.set(0, 39)
 
     this.enemy = new PIXI.Sprite(ResourceManager.instance.getTexture('boss_' + bossId + '.png'))
     this.enemy.anchor.set(0.5, 1)
-    this.enemy.position.set(this.back.width / 2, this.back.height + this.container.y + 50)
 
     TweenUtils.enemyStand(this.enemy)
-
-    this.weatherEffect = new MaskingEffect(
-      [ResourceManager.instance.getTexture('rain_1_png')],
-      Object.assign(RainEffectConfig, {
-        'spawnRect': {
-          'x': -this.back.width / 2,
-          'y': -this.back.height / 2,
-          'w': this.back.width * 1.5,
-          'h': this.back.height * 1.5,
-        },
-      }))
-
-    this.enemyBack = new PIXI.Graphics()
-    this.enemyBack.beginFill(0x000000, 0.5)
-    this.enemyBack.drawRect(0, 0, this.back.width, 39)
-    this.enemyBack.endFill()
 
     this.enemyDamageEffect = new AnimatedAtlasEffect()
     this.enemyDamageLabelEffect = new DamageLabelEffect()
 
+    this.enemyBack = new PIXI.Graphics()
     this.userBack = new PIXI.Graphics()
-    this.userBack.beginFill(0x000000, 0.5)
-    this.userBack.drawRect(0, 0, this.back.width, 39)
-    this.userBack.endFill()
-    this.userBack.position.set(0, this.container.y + this.back.height)
 
     this.enemyPhoto = new BattleUserPhoto('boss_photo_' + bossId + '.png')
-
     this.userPhoto = new BattleUserPhoto('maneken.png')
-    this.userPhoto.position.set(0, this.userBack.y)
 
     this.enemyName = new BattleUserName(this.enemyState.name || 'Enemy', 0xe82d2c)
-    this.enemyName.position.set(50, 22)
-
     this.userName = new BattleUserName(this.userState.name || 'User', 0x6085ad)
-    this.userName.position.set(50, this.userBack.y + 15)
 
     this.enemyHealth = new BattleHealth(BattleHealthType.Red, this.enemyState.currentHealth || 100)
-    this.enemyHealth.position.set(this.back.width - 69, 22)
-
     this.userHealth = new BattleHealth(BattleHealthType.Blue, this.userState.currentHealth || 100)
-    this.userHealth.position.set(this.back.width - 69, this.userBack.y + 15)
 
     this.enemyHealthbar = new BattleHealthbar(this.enemyState.currentHealthPercent || 100, 419, 6)
-    this.enemyHealthbar.position.set(this.enemyPhoto.x + this.enemyPhoto.width, 0)
-
     this.userHealthbar = new BattleHealthbar(this.userState.currentHealthPercent || 50, 419, 8)
-    this.userHealthbar.position.set(this.userPhoto.x + this.userPhoto.width, this.userBack.y + this.userBack.height - 8)
 
     this.container.addChild(this.back)
-    this.container.addChild(this.weatherEffect)
     this.container.addChild(this.enemy)
     this.container.addChild(this.enemyDamageEffect)
     this.container.addChild(this.enemyDamageLabelEffect)
@@ -157,6 +126,28 @@ export class BattleHeader extends PIXI.Container {
     this.addChild(this.userHealthbar)
 
     this.initEvents()
+    this.createWeatherEffect()
+  }
+
+
+  protected createWeatherEffect(): void {
+    if (this.weatherEffect) {
+      this.weatherEffect.release()
+      this.container.removeChild(this.weatherEffect)
+    }
+
+    this.weatherEffect = new MaskingEffect(
+      [ResourceManager.instance.getTexture('rain_1_png')],
+      Object.assign(RainEffectConfig, {
+        'spawnRect': {
+          'x': -this.back.width / 2,
+          'y': -this.back.height / 2,
+          'w': this.back.width * 1.5,
+          'h': this.back.height * 1.5,
+        },
+      }))
+
+    this.container.addChildAt(this.weatherEffect, 1)
   }
 
   protected initEvents(): void {
@@ -260,7 +251,9 @@ export class BattleHeader extends PIXI.Container {
   public resize(width: number, height: number, resolution: number): void {
     width = Math.min(width, this.back.width)
 
-    this.enemy.position.set(this.back.width / 2, this.back.height + this.container.y + 50)
+    this.back.x = width / 2
+
+    this.enemy.position.set(width / 2, this.back.height + 25)
 
     this.enemyBack.clear()
     this.enemyBack.beginFill(0x000000, 0.5)
