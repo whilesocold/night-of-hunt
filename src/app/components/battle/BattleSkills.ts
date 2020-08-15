@@ -208,7 +208,8 @@ export class BattleSkills extends PIXI.Container {
         handleOnComplete()
 
       } else {
-        TweenMax.to(skill, 1, { alpha: 1, onComplete: () => handleOnComplete() })
+        handleOnComplete()
+        TweenMax.to(skill, 1, { alpha: 1, /*onComplete: () => handleOnComplete()*/ })
       }
     })
   }
@@ -310,26 +311,6 @@ export class BattleSkills extends PIXI.Container {
         },
       })
     })
-  }
-
-  protected rearrangeSkills(now: boolean = false): void {
-    while (this.container.children.length > 0) {
-      this.container.removeChildAt(0)
-    }
-
-    const margin = 30
-
-    for (let i = 0; i < this.skills.length; i++) {
-      const skill = this.skills[i]
-      const previousSkill = i > 0 ? this.skills[i - 1] : null
-
-      skill.x = previousSkill ? previousSkill.x + previousSkill.width + margin : 0
-      skill.buttonMode = true
-      skill.interactive = true
-      skill.on('pointerdown', () => this.onSkillPointerDown(skill.index))
-
-      this.container.addChild(skill)
-    }
   }
 
   protected enableSkills(): void {

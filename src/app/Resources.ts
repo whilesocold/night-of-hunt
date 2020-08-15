@@ -21,6 +21,7 @@ const resources = {
 
   // Icons
   'default_avatar.png': 'res/images/icons/default_avatar.png',
+  'default_avatar.jpg': 'res/images/icons/default_avatar.jpg',
   'maneken.png': 'res/images/icons/maneken.png',
   'heart_red.png': 'res/images/icons/heart_red.png',
   'heart_blue.png': 'res/images/icons/heart_blue.png',

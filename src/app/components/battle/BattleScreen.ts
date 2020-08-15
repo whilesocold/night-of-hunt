@@ -40,10 +40,11 @@ export class BattleScreen extends PIXI.Container {
     this.header.resize(width, height, resolution)
 
     this.skills.x = width / 2
-    this.skills.y = this.header.y + this.header.height + 47
+    this.skills.y = this.header.y + this.header.height + 56
 
     this.log.x = width / 2
-    this.log.y = this.skills.y + 53
+    this.log.y = this.skills.y + 55
+    this.log.resize(width, height, resolution)
   }
 
   update(dt: number): void {

@@ -8,6 +8,7 @@ import { GameEvent } from '../../data/GameEvent'
 export class BattleLog extends PIXI.Container {
   protected headerLabel: PIXI.Text
   protected container: PIXI.Container
+  protected containerMask: PIXI.Graphics
 
   protected items: BattleLogItem[]
   protected itemsMax: number
@@ -18,7 +19,7 @@ export class BattleLog extends PIXI.Container {
     super()
 
     this.items = []
-    this.itemsMax = 3
+    this.itemsMax = 2
 
     this.headerLabel = new PIXI.Text('Журнал боя', {
       fontFamily: 'Munchkin-fnt',
@@ -30,8 +31,14 @@ export class BattleLog extends PIXI.Container {
     this.addChild(this.headerLabel)
 
     this.container = new PIXI.Container()
-    this.container.position.set(0, this.headerLabel.height + 18)
+    this.container.position.set(0, this.headerLabel.height + 22)
     this.addChild(this.container)
+
+    this.containerMask = new PIXI.Graphics()
+    this.containerMask.position.copyFrom(this.container.position)
+    this.addChild(this.containerMask)
+
+    this.container.mask = this.containerMask
 
     this.initFromState()
 
@@ -48,7 +55,7 @@ export class BattleLog extends PIXI.Container {
 
     if (fightLog.length > this.items.length) {
       for (let i = 0; i < this.items.length; i++) {
-        TweenMax.to(this.items[i].scale, 0.25, { x: 0.9, y: 0.9 })
+        TweenMax.to(this.items[i].scale, 0.75, { x: 0.9, y: 0.9 })
       }
 
       const newLog = fightLog[0]
@@ -60,7 +67,12 @@ export class BattleLog extends PIXI.Container {
         newLog.enemyDamage,
         newLog.enemyDead)
 
-      TweenMax.to(item.scale, 0.25, { x: 1.05, y: 1.05 })
+      item.scale.set(0.9)
+      item.alpha = 1
+      item.y = -150
+
+      TweenMax.to(item, 0.75, { alpha: 1 })
+      TweenMax.to(item.scale, 0.75, { x: 1.05, y: 1.05 })
 
       this.addItem(item, true)
     }
@@ -118,9 +130,18 @@ export class BattleLog extends PIXI.Container {
     }
 
     for (let i = 0; i < this.items.length; i++) {
-      this.items[i].y = (this.items[i].height + offset) * i
+      //this.items[i].y = (this.items[i].height + offset) * i
+
+      TweenMax.to(this.items[i], 0.75, { y: (this.items[i].height + offset) * i })
     }
 
     this.container.addChild(item)
+  }
+
+  resize(width: number, height: number, resolution: number): void {
+    this.containerMask.clear()
+    this.containerMask.beginFill(0x000000)
+    this.containerMask.drawRect(-width/2, -18, width, height)
+    this.containerMask.endFill()
   }
 }
