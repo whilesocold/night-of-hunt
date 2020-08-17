@@ -20,6 +20,7 @@ export class BattleScreen extends PIXI.Container {
     this.container = new PIXI.Container()
 
     this.back = new PIXI.Sprite(ResourceManager.instance.getTexture('main_back.jpg'))
+    this.back.anchor.set(0.5, 0)
 
     this.header = new BattleHeader()
     this.skills = new BattleSkills()
@@ -36,6 +37,8 @@ export class BattleScreen extends PIXI.Container {
   }
 
   resize(width: number, height: number, resolution: number): void {
+    this.back.x = width / 2
+
     this.header.x = Math.max(0, (width - this.header.width) / 2)
     this.header.resize(width, height, resolution)
 

@@ -10,6 +10,7 @@ export class BattleUserName extends PIXI.Container {
       fontFamily: 'Munchkin-fnt',
       fontSize: 16,
       fill: color,
+      fontVariant: 'bold'
     })
     this.label.anchor.set(0, 0.5)
 

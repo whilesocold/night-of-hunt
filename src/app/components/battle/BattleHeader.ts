@@ -188,7 +188,8 @@ export class BattleHeader extends PIXI.Container {
       Utils.randomRange(-damageEffectMargin, damageEffectMargin),
       Utils.randomRange(-damageEffectMargin, damageEffectMargin))
 
-    const damageLabelEffectSize = 0.35 * fightLog[0].schools.length
+    const damageLabelEffectSizes = [0.5, 0.75, 1]
+    const damageLabelEffectSize = damageLabelEffectSizes[fightLog[0].schools.length - 1]
 
     this.enemyDamageEffect.setFrames('blood_splash_' + Utils.randomRange(2, 2) + '_png',
       512,
@@ -214,8 +215,7 @@ export class BattleHeader extends PIXI.Container {
   protected onBattlePlayerTurnEnding(state): void {
     console.log('onBattlePlayerTurnEnding', state)
 
-    this.enemyDamageLabelEffect.hide()
-
+    setTimeout(() => this.enemyDamageLabelEffect.hide(), this.turnTime * 3 * 1000)
     setTimeout(() => {
       EventBus.emit(GameEvent.BattleEnemyTurnStarting, state)
     }, this.turnTime * 1000)
@@ -257,12 +257,12 @@ export class BattleHeader extends PIXI.Container {
 
     this.enemyBack.clear()
     this.enemyBack.beginFill(0x000000, 0.5)
-    this.enemyBack.drawRect(0, 0, width, 39)
+    this.enemyBack.drawRect(this.enemyPhoto.width, 0, width - this.enemyPhoto.width, 39)
     this.enemyBack.endFill()
 
     this.userBack.clear()
     this.userBack.beginFill(0x000000, 0.5)
-    this.userBack.drawRect(0, 0, width, 39)
+    this.userBack.drawRect(this.userPhoto.width, 0, width - this.userPhoto.width, 39)
     this.userBack.endFill()
 
     this.userBack.position.set(0, this.container.y + this.back.height)

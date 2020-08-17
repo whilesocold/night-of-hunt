@@ -12,6 +12,7 @@ export class DamageLabelEffect extends PIXI.Container {
       fontFamily: 'Munchkin-fnt',
       fontSize: 64,
       fill: 0xff0000,
+      align: 'center'
     })
     this.label.alpha = 0
     this.label.anchor.set(0.5)

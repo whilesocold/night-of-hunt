@@ -18,6 +18,7 @@ export class BattleHealth extends PIXI.Container {
 
     this.sprite = new PIXI.Sprite(ResourceManager.instance.getTexture(type === BattleHealthType.Blue ? 'heart_blue.png' : 'heart_red.png'))
     this.sprite.anchor.set(0, 0.5)
+    this.sprite.position.set(0, 2)
 
     this.label = new PIXI.Text(value.toString(), {
       fontFamily: 'Munchkin-fnt',
