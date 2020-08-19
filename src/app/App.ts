@@ -8,6 +8,8 @@ import { RequestManager } from './utils/RequestManager'
 import { DataStorage } from './utils/DataStorage'
 import { BattleScreen } from './components/battle/BattleScreen'
 import { GameEvent } from './data/GameEvent'
+import { BattleRewardScreen } from './components/battle/BattleRewardScreen'
+import { BattleRewardState } from './data/BattleRewardState'
 
 interface AppInitOptions {
   debugMode?: boolean
@@ -30,7 +32,7 @@ export class App {
   private resourceManager: ResourceManager
   private requestManager: RequestManager
 
-  private screen: BattleScreen
+  private screen: BattleScreen | BattleRewardScreen
 
   constructor() {
     App.instance = this
@@ -119,13 +121,13 @@ export class App {
       })
     })
 
-    /*
     EventBus.on(GameEvent.BattleEnemyTurnEnding, () => {
       if (State.has('reward')) {
         this.stage.removeChild(this.screen)
+        this.stage.addChild(this.screen = new BattleRewardScreen(State.get('reward') as BattleRewardState))
+        this.onResize()
       }
     })
-     */
   }
 
   private onUpdate(dt: number): void {
