@@ -35,7 +35,6 @@ class BattleRewardItem extends PIXI.Container {
 
 class BattleRewardCard extends PIXI.Container {
   protected back: PIXI.Sprite
-  protected school: PIXI.Sprite
   protected label: PIXI.Text
 
   constructor(data: BattleRewardUserCardState) {
@@ -43,9 +42,6 @@ class BattleRewardCard extends PIXI.Container {
 
     this.back = new PIXI.Sprite(ResourceManager.instance.getTexture('card_' + data.image))
     this.back.anchor.set(0.5)
-
-    this.school = new PIXI.Sprite(ResourceManager.instance.getTexture('school_' + data.school + '.png'))
-    this.school.anchor.set(0.5)
 
     this.label = new PIXI.Text(data.damage.toString(), {
       fontFamily: 'Munchkin-fnt',
@@ -57,7 +53,6 @@ class BattleRewardCard extends PIXI.Container {
     this.label.position.set(-10, -36)
 
     this.addChild(this.back)
-    this.addChild(this.school)
     this.addChild(this.label)
   }
 }
