@@ -1,8 +1,12 @@
 import * as PIXI from 'pixi.js'
+import { Bounce, Linear, TweenMax } from 'gsap'
+
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 import { BattleRewardState } from '../../data/BattleRewardState'
 import { BattleRewardUserCardState } from '../../data/BattleRewardUserCardState'
 import { BattleSkillColor } from './BattleSkill'
+
+import { App } from '../../App'
 
 class BattleRewardItem extends PIXI.Container {
   protected back: PIXI.Sprite
@@ -63,6 +67,7 @@ class BattleRewardButton extends PIXI.Container {
   protected left: PIXI.Sprite
   protected mid: PIXI.Sprite
   protected right: PIXI.Sprite
+  protected glow: PIXI.Sprite
 
   constructor() {
     super()
@@ -87,10 +92,21 @@ class BattleRewardButton extends PIXI.Container {
     this.right.anchor.set(0, 0.5)
     this.right.x = this.mid.width / 2
 
+    this.glow = new PIXI.Sprite(ResourceManager.instance.getTexture('school_glow_3.png'))
+    this.glow.width = this.mid.width + this.left.width + this.right.width + 100
+    this.glow.height = this.mid.height + 40
+    this.glow.anchor.set(0.5)
+    this.glow.alpha = 0
+
+    this.addChild(this.glow)
     this.addChild(this.left)
     this.addChild(this.mid)
     this.addChild(this.right)
     this.addChild(this.label)
+  }
+
+  public startAnimation(): void {
+    TweenMax.to(this.glow, 0.5, { yoyo: true, repeat: -1, alpha: 1 })
   }
 }
 
@@ -177,17 +193,55 @@ export class BattleRewardScreen extends PIXI.Container {
     }
 
     reward.userCards.forEach(data => this.addCard(data))
+
+    this.resize(App.instance.getRenderer().width, App.instance.getRenderer().height, App.instance.getRenderer().resolution)
+
+    // animate
+    this.winHead.y = -200
+
+    TweenMax.to(this.winHead, 1, { y: 50, ease: Bounce.easeOut })
+
+    this.itemContainer.alpha = 0
+    this.itemContainer.scale.set(0)
+
+    TweenMax.to(this.itemContainer, 0.5, { delay: 0.75, alpha: 1, ease: Linear.easeOut })
+    TweenMax.to(this.itemContainer.scale, 0.5, { delay: 0.75, x: 1, y: 1, ease: Linear.easeOut })
+
+    if (this.cardContainer.children.length > 0) {
+      this.cardContainer.alpha = 0
+      this.cardContainer.scale.set(0)
+
+      this.claimButton.alpha = 0
+      this.claimButton.scale.set(0)
+
+      TweenMax.to(this.cardContainer, 0.5, { delay: 0.75 * 2, alpha: 1, ease: Linear.easeOut })
+      TweenMax.to(this.cardContainer.scale, 0.5, { delay: 0.75 * 2, x: 1, y: 1, ease: Linear.easeOut })
+
+      TweenMax.to(this.claimButton, 0.5, { delay: 0.75 * 3, alpha: 1, ease: Linear.easeOut })
+      TweenMax.to(this.claimButton.scale, 0.5, {
+        delay: 0.75 * 3, x: 1, y: 1, ease: Linear.easeOut, onComplete: () => {
+          this.claimButton.startAnimation()
+
+          TweenMax.to(this.claimButton.scale, 0.5, { x: 1.1, y: 1.1, repeat: -1, yoyo: true })
+        },
+      })
+
+    } else {
+      this.claimButton.alpha = 0
+      this.claimButton.scale.set(0)
+
+      TweenMax.to(this.claimButton, 0.5, { delay: 0.75 * 2, alpha: 1, ease: Linear.easeOut })
+      TweenMax.to(this.claimButton.scale, 0.5, {
+        delay: 0.75 * 2, x: 1, y: 1, ease: Linear.easeOut, onComplete: () => {
+          this.claimButton.startAnimation()
+
+          TweenMax.to(this.claimButton.scale, 0.5, { x: 1.1, y: 1.1, repeat: -1, yoyo: true })
+        },
+      })
+    }
   }
 
   resize(width: number, height: number, resolution: number): void {
-    this.back.x = width / 2
-    this.winHead.x = width / 2
-    this.winBack.x = width / 2
-
-    this.itemContainer.x = (width - this.itemContainer.width) / 2
-    this.cardContainer.x = (width - this.cardContainer.width) / 2
-    this.claimButton.x = width / 2
-
     this.backSolid.clear()
     this.backSolid.beginFill(0x000000)
     this.backSolid.drawRect((width - 460) / 2, 0, 460, height)
@@ -195,6 +249,18 @@ export class BattleRewardScreen extends PIXI.Container {
   }
 
   update(dt: number): void {
+    const resolution = App.instance.getRenderer().resolution
+    const width = App.instance.getRenderer().width / resolution
+    const height = App.instance.getRenderer().height / resolution
+
+    this.back.x = width / 2
+
+    this.winHead.x = width / 2
+    this.winBack.x = width / 2
+
+    this.itemContainer.x = (width - this.itemContainer.width) / 2
+    this.cardContainer.x = (width - this.cardContainer.width) / 2
+    this.claimButton.x = width / 2
   }
 
   async addItem(image: string, value: number, valueColor: number): Promise<BattleRewardItem> {

@@ -151,6 +151,10 @@ export class App {
     return this.app
   }
 
+  public getRenderer(): PIXI.Renderer {
+    return this.app.renderer
+  }
+
   public getStage(): PIXI.Container {
     return this.stage
   }
