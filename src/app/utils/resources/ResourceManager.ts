@@ -2,6 +2,7 @@ import { EventEmitter } from 'eventemitter3'
 
 import { TextureManager, TextureManagerEvent } from './TextureManager'
 import { FontManager, FontManagerEvent } from './FontManager'
+import { SoundManager, SoundManagerEvent } from './SoundManager'
 import { Utils } from '../Utils'
 
 export enum ResourceManagerEvent {
@@ -15,6 +16,7 @@ export class ResourceManager extends EventEmitter {
 
   private textureManager: TextureManager = null
   private fontManager: FontManager = null
+  private soundManager: SoundManager = null
 
   constructor() {
     super()
@@ -23,6 +25,7 @@ export class ResourceManager extends EventEmitter {
 
     this.textureManager = new TextureManager()
     this.fontManager = new FontManager()
+    this.soundManager = new SoundManager()
   }
 
   private addSomething(key: string, url: string): void {
@@ -31,6 +34,9 @@ export class ResourceManager extends EventEmitter {
 
     } else if (url.includes('.ttf')) {
       this.fontManager.add(key)
+
+    } else if (url.includes('.mp3') || url.includes('.wav') || url.includes('.ogg')) {
+      this.soundManager.add(key, url)
     }
   }
 
@@ -59,10 +65,16 @@ export class ResourceManager extends EventEmitter {
     this.textureManager.once(TextureManagerEvent.Complete, () => {
       this.fontManager.on(FontManagerEvent.Progress, () => iteration())
       this.fontManager.once(FontManagerEvent.Complete, () => {
-        this.textureManager.removeAllListeners()
-        this.fontManager.removeAllListeners()
+        this.soundManager.on(SoundManagerEvent.Progress, () => iteration())
+        this.soundManager.once(SoundManagerEvent.Complete, () => {
+          this.textureManager.removeAllListeners()
+          this.fontManager.removeAllListeners()
+          this.soundManager.removeAllListeners()
 
-        this.emit(ResourceManagerEvent.Complete)
+          this.emit(ResourceManagerEvent.Complete)
+        })
+
+        this.soundManager.load()
       })
       this.fontManager.load()
     })
@@ -75,6 +87,7 @@ export class ResourceManager extends EventEmitter {
   public free(): ResourceManager {
     this.textureManager.free()
     this.fontManager.free()
+    this.soundManager.free()
 
     return this
   }
@@ -89,5 +102,9 @@ export class ResourceManager extends EventEmitter {
 
   public getFontManager(): FontManager {
     return this.fontManager
+  }
+
+  public getSoundManager(): SoundManager {
+    return this.soundManager
   }
 }

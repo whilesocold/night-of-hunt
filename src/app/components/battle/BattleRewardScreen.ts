@@ -180,17 +180,18 @@ export class BattleRewardScreen extends PIXI.Container {
     const goldValue = reward.gold
     const silverValue = reward.silver
     const expValue = reward.exp
+    const energyValue = reward.energy
+    const snowFlakesValue = reward.snowflakes
+    const toyValue = reward.toys
+    const valorValue = reward.valor
 
-    if (goldValue > 0) {
-      this.addItem('item_gold.png', goldValue, 0xeedd68)
-    }
-
-    if (silverValue > 0) {
-      this.addItem('item_silver.png', silverValue, 0x8b8b8b)
-    }
-    if (expValue > 0) {
-      this.addItem('item_exp.png', expValue, 0xeedd68)
-    }
+    if (goldValue > 0) this.addItem('item_gold.png', goldValue, 0xeedd68)
+    if (silverValue > 0) this.addItem('item_silver.png', silverValue, 0x8b8b8b)
+    if (expValue > 0) this.addItem('item_exp.png', expValue, 0xeedd68)
+    if (energyValue > 0) this.addItem('item_energy.png', energyValue, 0x337ab7)
+    if (snowFlakesValue > 0) this.addItem('item_snowflake.png', snowFlakesValue, 0xffffff)
+    if (toyValue > 0) this.addItem('item_toy.png', toyValue, 0xffffff)
+    if (valorValue > 0) this.addItem('item_valor.png', valorValue, 0xffffff)
 
     reward.userCards.forEach(data => this.addCard(data))
 
@@ -199,46 +200,44 @@ export class BattleRewardScreen extends PIXI.Container {
     // animate
     this.winHead.y = -200
 
-    TweenMax.to(this.winHead, 1, { y: 50, ease: Bounce.easeOut })
-
     this.itemContainer.alpha = 0
     this.itemContainer.scale.set(0)
 
-    TweenMax.to(this.itemContainer, 0.5, { delay: 0.75, alpha: 1, ease: Linear.easeOut })
-    TweenMax.to(this.itemContainer.scale, 0.5, { delay: 0.75, x: 1, y: 1, ease: Linear.easeOut })
+    this.cardContainer.alpha = 0
+    this.cardContainer.scale.set(0)
 
-    if (this.cardContainer.children.length > 0) {
-      this.cardContainer.alpha = 0
-      this.cardContainer.scale.set(0)
+    this.claimButton.alpha = 0
+    this.claimButton.scale.set(0)
 
-      this.claimButton.alpha = 0
-      this.claimButton.scale.set(0)
+    setTimeout(() => {
+      TweenMax.to(this.winHead, 1, { y: 50, ease: Bounce.easeOut })
+      TweenMax.to(this.itemContainer, 0.5, { delay: 0.75, alpha: 1, ease: Linear.easeOut })
+      TweenMax.to(this.itemContainer.scale, 0.5, { delay: 0.75, x: 1, y: 1, ease: Linear.easeOut })
 
-      TweenMax.to(this.cardContainer, 0.5, { delay: 0.75 * 2, alpha: 1, ease: Linear.easeOut })
-      TweenMax.to(this.cardContainer.scale, 0.5, { delay: 0.75 * 2, x: 1, y: 1, ease: Linear.easeOut })
+      if (this.cardContainer.children.length > 0) {
+        TweenMax.to(this.cardContainer, 0.5, { delay: 0.75 * 2, alpha: 1, ease: Linear.easeOut })
+        TweenMax.to(this.cardContainer.scale, 0.5, { delay: 0.75 * 2, x: 1, y: 1, ease: Linear.easeOut })
 
-      TweenMax.to(this.claimButton, 0.5, { delay: 0.75 * 3, alpha: 1, ease: Linear.easeOut })
-      TweenMax.to(this.claimButton.scale, 0.5, {
-        delay: 0.75 * 3, x: 1, y: 1, ease: Linear.easeOut, onComplete: () => {
-          this.claimButton.startAnimation()
+        TweenMax.to(this.claimButton, 0.5, { delay: 0.75 * 3, alpha: 1, ease: Linear.easeOut })
+        TweenMax.to(this.claimButton.scale, 0.5, {
+          delay: 0.75 * 3, x: 1, y: 1, ease: Linear.easeOut, onComplete: () => {
+            this.claimButton.startAnimation()
 
-          TweenMax.to(this.claimButton.scale, 0.5, { x: 1.1, y: 1.1, repeat: -1, yoyo: true })
-        },
-      })
+            TweenMax.to(this.claimButton.scale, 0.5, { x: 1.1, y: 1.1, repeat: -1, yoyo: true })
+          },
+        })
 
-    } else {
-      this.claimButton.alpha = 0
-      this.claimButton.scale.set(0)
+      } else {
+        TweenMax.to(this.claimButton, 0.5, { delay: 0.75 * 2, alpha: 1, ease: Linear.easeOut })
+        TweenMax.to(this.claimButton.scale, 0.5, {
+          delay: 0.75 * 2, x: 1, y: 1, ease: Linear.easeOut, onComplete: () => {
+            this.claimButton.startAnimation()
 
-      TweenMax.to(this.claimButton, 0.5, { delay: 0.75 * 2, alpha: 1, ease: Linear.easeOut })
-      TweenMax.to(this.claimButton.scale, 0.5, {
-        delay: 0.75 * 2, x: 1, y: 1, ease: Linear.easeOut, onComplete: () => {
-          this.claimButton.startAnimation()
-
-          TweenMax.to(this.claimButton.scale, 0.5, { x: 1.1, y: 1.1, repeat: -1, yoyo: true })
-        },
-      })
-    }
+            TweenMax.to(this.claimButton.scale, 0.5, { x: 1.1, y: 1.1, repeat: -1, yoyo: true })
+          },
+        })
+      }
+    }, 2000)
   }
 
   resize(width: number, height: number, resolution: number): void {

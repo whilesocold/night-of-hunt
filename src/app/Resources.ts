@@ -183,6 +183,12 @@ const resources = {
   'item_gold.png': 'res/images/winning/item_gold.png',
   'item_silver.png': 'res/images/winning/item_silver.png',
   'item_exp.png': 'res/images/winning/item_exp.png',
+  'item_valor.png': 'res/images/winning/item_valor.png',
+  'item_energy.png': 'res/images/winning/item_energy.png',
+  'item_snowflake.png': 'res/images/winning/item_snowflake.png',
+  'item_toy.png': 'res/images/winning/item_toy.png',
+  'item_blood.png': 'res/images/winning/item_blood.png',
+  'item_cards.png': 'res/images/winning/item_cards.png',
 
   'card_1.png': 'res/images/winning/cards/card_1.png',
   'card_2.png': 'res/images/winning/cards/card_2.png',
@@ -362,6 +368,10 @@ const resources = {
 
   // Other
   'dig_fight.png': 'res/images/dig_fight.png',
+
+  // Sounds
+  'ambient_music.mp3': 'res/sounds/ambient_music.mp3',
+  'battle_music.mp3': 'res/sounds/battle_music.mp3',
 
   // Fonts
   'Munchkin-fnt': 'Munchkin-fnt',

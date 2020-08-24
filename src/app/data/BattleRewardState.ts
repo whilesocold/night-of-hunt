@@ -12,6 +12,7 @@ export interface BattleRewardState {
   exp: number
   expCards: number
   gold: number
+  valor: number
   goldLimit: number
   ingredients: any // TODO
   items: BattleRewardItemState[]

@@ -10,6 +10,7 @@ import { BattleScreen } from './components/battle/BattleScreen'
 import { GameEvent } from './data/GameEvent'
 import { BattleRewardScreen } from './components/battle/BattleRewardScreen'
 import { BattleRewardState } from './data/BattleRewardState'
+import { SoundManager } from './utils/resources/SoundManager'
 
 interface AppInitOptions {
   debugMode?: boolean
@@ -30,6 +31,7 @@ export class App {
   private width: number
 
   private resourceManager: ResourceManager
+  private soundManager: SoundManager
   private requestManager: RequestManager
 
   private screen: BattleScreen | BattleRewardScreen
@@ -59,6 +61,8 @@ export class App {
       this.resourceManager.addFromMap(config)
       this.resourceManager.once(ResourceManagerEvent.Complete, () => resolve())
       this.resourceManager.load()
+
+      this.soundManager = new SoundManager()
     })
   }
 
@@ -94,8 +98,12 @@ export class App {
     this.ticker = this.app.ticker
     this.stage = this.app.stage
 
-    this.screen = new BattleScreen()
-    this.stage.addChild(this.screen)
+    if (this.checkReward()) {
+      this.showReward()
+
+    } else {
+      this.showBattle()
+    }
 
     this.ticker.add((dt) => this.onUpdate(dt))
 
@@ -122,12 +130,64 @@ export class App {
     })
 
     EventBus.on(GameEvent.BattleEnemyTurnEnding, () => {
-      if (State.has('reward')) {
-        this.stage.removeChild(this.screen)
-        this.stage.addChild(this.screen = new BattleRewardScreen(State.get('reward') as BattleRewardState))
-        this.onResize()
+      if (this.checkReward()) {
+        this.showReward()
       }
     })
+  }
+
+  private releaseScreen(): void {
+    if (this.screen) {
+      this.stage.removeChild(this.screen)
+    }
+  }
+
+  private async showBattle(): Promise<void> {
+    this.releaseScreen()
+
+    this.screen = new BattleScreen()
+    this.stage.addChild(this.screen)
+
+    const soundFadeTime = 2
+
+    const ambientMusic = this.soundManager.get('battle_music.mp3')
+
+    if (ambientMusic) {
+      ambientMusic.fadeTo(1, soundFadeTime).then(() => this.soundManager.stop('ambient_music.mp3'))
+    }
+
+    const battleMusic = await this.soundManager.play('battle_music.mp3', { loop: true })
+
+    battleMusic.volume = 0
+    battleMusic.fadeTo(1, soundFadeTime)
+  }
+
+  private async showReward(): Promise<void> {
+    const soundFadeTime = 2
+
+    const battleMusic = this.soundManager.get('battle_music.mp3')
+
+    if (battleMusic) {
+      battleMusic.fadeTo(0, soundFadeTime).then(() => this.soundManager.stop('battle_music.mp3'))
+    }
+
+    const ambientMusic = await this.soundManager.play('ambient_music.mp3', { loop: true })
+
+    ambientMusic.volume = 0
+    ambientMusic.fadeTo(1, soundFadeTime)
+
+    this.releaseScreen()
+
+    this.stage.addChild(this.screen = new BattleRewardScreen(State.get('reward') as BattleRewardState))
+    this.onResize()
+  }
+
+  private checkReward(): boolean {
+    if (State.has('reward')) {
+      return true
+    }
+
+    return false
   }
 
   private onUpdate(dt: number): void {

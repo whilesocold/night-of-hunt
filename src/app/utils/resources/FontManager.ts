@@ -23,7 +23,7 @@ export class FontManager extends EventEmitter {
     return this
   }
 
-  public addFromArray(keys: any): FontManager {
+  public addFromMap(keys: any): FontManager {
     this.families = this.families.concat(keys)
 
     return this
