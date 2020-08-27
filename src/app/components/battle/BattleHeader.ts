@@ -253,7 +253,7 @@ export class BattleHeader extends PIXI.Container {
 
     this.back.x = width / 2
 
-    this.enemy.position.set(width / 2, this.back.height + 25)
+    this.enemy.position.set(width / 2, this.back.height)
 
     this.enemyBack.clear()
     this.enemyBack.beginFill(0x000000, 0.5)

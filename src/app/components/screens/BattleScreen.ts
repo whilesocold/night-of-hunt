@@ -1,9 +1,9 @@
 import * as PIXI from 'pixi.js'
 
-import { BattleHeader } from './BattleHeader'
+import { BattleHeader } from '../battle/BattleHeader'
 import { ResourceManager } from '../../utils/resources/ResourceManager'
-import { BattleSkills } from './BattleSkills'
-import { BattleLog } from './BattleLog'
+import { BattleSkills } from '../battle/BattleSkills'
+import { BattleLog } from '../battle/BattleLog'
 
 export class BattleScreen extends PIXI.Container {
   protected container: PIXI.Container

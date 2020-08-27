@@ -6,11 +6,12 @@ import { ResourceManager, ResourceManagerEvent } from './utils/resources/Resourc
 import { ResourcesConfig } from './Resources'
 import { RequestManager } from './utils/RequestManager'
 import { DataStorage } from './utils/DataStorage'
-import { BattleScreen } from './components/battle/BattleScreen'
+import { BattleScreen } from './components/screens/BattleScreen'
 import { GameEvent } from './data/GameEvent'
-import { BattleRewardScreen } from './components/battle/BattleRewardScreen'
+import { BattleRewardScreen } from './components/screens/BattleRewardScreen'
 import { BattleRewardState } from './data/BattleRewardState'
 import { SoundManager } from './utils/resources/SoundManager'
+import { MapScreen } from './components/screens/MapScreen'
 
 interface AppInitOptions {
   debugMode?: boolean
@@ -34,7 +35,7 @@ export class App {
   private soundManager: SoundManager
   private requestManager: RequestManager
 
-  private screen: BattleScreen | BattleRewardScreen
+  private screen: any
 
   constructor() {
     App.instance = this
@@ -59,6 +60,12 @@ export class App {
 
       this.resourceManager = new ResourceManager()
       this.resourceManager.addFromMap(config)
+      this.resourceManager.on(ResourceManagerEvent.Progress, (current, total, percent) => {
+        const div = document.getElementById('progress')
+
+        div.setAttribute('value', percent)
+        div.setAttribute('data-label', 'Loading: ' + Math.floor(percent) + '%')
+      })
       this.resourceManager.once(ResourceManagerEvent.Complete, () => resolve())
       this.resourceManager.load()
 
@@ -98,12 +105,16 @@ export class App {
     this.ticker = this.app.ticker
     this.stage = this.app.stage
 
+    this.showMap()
+
+    /*
     if (this.checkReward()) {
       this.showReward()
 
     } else {
       this.showBattle()
     }
+     */
 
     this.ticker.add((dt) => this.onUpdate(dt))
 
@@ -140,6 +151,13 @@ export class App {
     if (this.screen) {
       this.stage.removeChild(this.screen)
     }
+  }
+
+  private async showMap(): Promise<void> {
+    this.releaseScreen()
+
+    this.screen = new MapScreen()
+    this.stage.addChild(this.screen)
   }
 
   private async showBattle(): Promise<void> {

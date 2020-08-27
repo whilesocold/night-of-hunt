@@ -373,6 +373,41 @@ const resources = {
   'ambient_music.mp3': 'res/sounds/ambient_music.mp3',
   'battle_music.mp3': 'res/sounds/battle_music.mp3',
 
+  // Map
+  'map_a_1.png': 'res/images/map/map_a_1.png',
+  'map_a_2.png': 'res/images/map/map_a_2.png',
+  'map_a_3.png': 'res/images/map/map_a_3.png',
+  'map_a_4.png': 'res/images/map/map_a_4.png',
+  'map_b_1.png': 'res/images/map/map_b_1.png',
+  'map_b_2.png': 'res/images/map/map_b_2.png',
+  'map_b_3.png': 'res/images/map/map_b_3.png',
+  'map_b_4.png': 'res/images/map/map_b_4.png',
+  'map_b_5.png': 'res/images/map/map_b_5.png',
+  'map_b_6.png': 'res/images/map/map_b_6.png',
+  'map_back.jpg': 'res/images/map/map_back.jpg',
+  'map_background_avatar.png': 'res/images/map/map_background_avatar.png',
+
+  'map_chat_b.png': 'res/images/map/map_chat_b.png',
+  'map_chat.png': 'res/images/map/map_chat.png',
+
+  'map_corner.png': 'res/images/map/map_corner.png',
+  'map_footer_deco_left.png': 'res/images/map/map_footer_deco_left.png',
+  'map_footer_deco_right.png': 'res/images/map/map_footer_deco_right.png',
+
+  'map_lock.png': 'res/images/map/map_lock.png',
+  'map_map_cont.png': 'res/images/map/map_map_cont.png',
+  'map_number.png': 'res/images/map/map_number.png',
+  'map_plus.png': 'res/images/map/map_plus.png',
+  'map_vip.png': 'res/images/map/map_vip.png',
+
+  'map_xp_empty.png': 'res/images/map/map_xp_empty.png',
+  'map_xp_full.png': 'res/images/map/map_xp_full.png',
+  'map_xp_left.png': 'res/images/map/map_xp_left.png',
+  'map_xp_razsek_empty.png': 'res/images/map/map_xp_razsek_empty.png',
+  'map_xp_razsek.png': 'res/images/map/map_xp_razsek.png',
+  'map_xp_right.png': 'res/images/map/map_xp_right.png',
+
+
   // Fonts
   'Munchkin-fnt': 'Munchkin-fnt',
 }

@@ -4,7 +4,7 @@ import { Bounce, Linear, TweenMax } from 'gsap'
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 import { BattleRewardState } from '../../data/BattleRewardState'
 import { BattleRewardUserCardState } from '../../data/BattleRewardUserCardState'
-import { BattleSkillColor } from './BattleSkill'
+import { BattleSkillColor } from '../battle/BattleSkill'
 
 import { App } from '../../App'
 
