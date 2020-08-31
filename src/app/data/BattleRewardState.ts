@@ -1,6 +1,7 @@
 import { BattleRewardCardState } from './BattleRewardCardState'
 import { BattleRewardItemState } from './BattleRewardItemState'
 import { BattleRewardUserCardState } from './BattleRewardUserCardState'
+import { BattleRewardJoinState } from './BattleRewardJoinState'
 
 export interface BattleRewardState {
   blood: number
@@ -16,7 +17,7 @@ export interface BattleRewardState {
   goldLimit: number
   ingredients: any // TODO
   items: BattleRewardItemState[]
-  joins: any // TODO
+  joins: BattleRewardJoinState[]
   lose: boolean
   newCards: BattleRewardCardState[]
   pvpRating: number

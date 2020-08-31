@@ -105,16 +105,91 @@ export class App {
     this.ticker = this.app.ticker
     this.stage = this.app.stage
 
-    this.showMap()
+    State.set('reward', {
+      'cards': [{ 'id': 0, 'level': 1, 'exp': 2 }],
+      'items': [{ 'itemId': 0, 'quality': 1, 'level': 2 }],
+      'ingredients': [],
+      'exp': 92,
+      'silver': 131,
+      'gold': 0,
+      'pvpRating': 0,
+      'userCards': [{
+        'id': 1577251,
+        'cardId': 7,
+        'userId': 388548,
+        'name': 'Зов смерти',
+        'image': '7.png',
+        'school': 3,
+        'exp': 74,
+        'addExp': 2,
+        'level': 1,
+        'changed': true,
+        'newCard': false,
+        'damage': 142,
+        'quality': 1,
+        'info': { 'id': 7, 'damage': 10, 'school': 3, 'image': '7.png', 'chapter': 0 },
+        'maxLevel': 66,
+        'percentLevel': 100,
+        'nextLevelExp': 5,
+        'priceNextLevel': { 'id': 2, 'exp': 5, 'silver': 600, 'gold': 0, 'dropExp': 4, 'damage': 10 },
+        'damageOri': 10,
+        'schoolName': 'Школа Мага',
+      }],
+      'newCards': [],
+      'userItems': [],
+      'userIngredients': [],
+      'bonusExp': 0,
+      'bonusDays': 0,
+      'joins': [{
+        'rune': 0,
+        'sharpening': 0,
+        'id': 51068199,
+        'userId': 388548,
+        'name': 'Ржавый кинжал дозорного',
+        'itemId': 5,
+        'typeId': 1,
+        'slotTypeId': 3,
+        'level': 5,
+        'levelMax': 5,
+        'exp': 5,
+        'createdAt': 1598261866000,
+        'updateAt': 1598261866000,
+        'join': null,
+        'school': 1,
+        'equipped': true,
+        'quality': 1,
+        'health': 28,
+        'set': 2,
+        'changed': true,
+        'lock': { 'holdCount': 0, 'heldByCurrentThread': false, 'locked': false, 'fair': false, 'queueLength': 0 },
+        'nextLevel': { 'id': 6, 'exp': 316, 'dropExp': 100 },
+        'percentLevel': 1,
+        'itemLevel': { 'id': 5, 'exp': 165, 'dropExp': 80 },
+        'runeInfo': null,
+        'runeDamageNew': 3,
+        'sharpeningDamageNew': 2,
+        'sharpeningInfo': null,
+        'nextSharpeningInfo': { 'level': 1, 'silver': 300, 'gold': 0 },
+      }],
+      'countJoins': 1,
+      'energy': 0,
+      'goldLimit': 0,
+      'snowflakes': 0,
+      'toys': 0,
+      'lose': false,
+      'valor': 0,
+      'blood': 0,
+      'expCards': 2,
+    })
 
-    /*
+    //this.showMap()
+
     if (this.checkReward()) {
       this.showReward()
 
     } else {
       this.showBattle()
     }
-     */
 
     this.ticker.add((dt) => this.onUpdate(dt))
 
@@ -195,6 +270,8 @@ export class App {
     ambientMusic.fadeTo(1, soundFadeTime)
 
     this.releaseScreen()
+
+    console.log(JSON.stringify(State.get('reward')))
 
     this.stage.addChild(this.screen = new BattleRewardScreen(State.get('reward') as BattleRewardState))
     this.onResize()
