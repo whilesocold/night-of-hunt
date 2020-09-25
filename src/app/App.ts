@@ -2,16 +2,17 @@ import * as PIXI from 'pixi.js'
 
 import EventEmitter from 'eventemitter3'
 
-import { ResourceManager, ResourceManagerEvent } from './utils/resources/ResourceManager'
 import { ResourcesConfig } from './Resources'
+
+import { ResourceManager, ResourceManagerEvent } from './utils/resources/ResourceManager'
 import { RequestManager } from './utils/RequestManager'
 import { DataStorage } from './utils/DataStorage'
-import { BattleScreen } from './components/screens/BattleScreen'
 import { GameEvent } from './data/GameEvent'
-import { BattleRewardScreen } from './components/screens/BattleRewardScreen'
-import { BattleRewardState } from './data/BattleRewardState'
 import { SoundManager } from './utils/resources/SoundManager'
+import { ScreenManager } from './utils/ScreenManager'
 import { MapScreen } from './components/screens/MapScreen'
+import { ArenaBattleScreen } from './components/screens/ArenaBattleScreen'
+import { DeadWarSearchScreen } from './components/screens/DeadWarSearchScreen'
 
 interface AppInitOptions {
   debugMode?: boolean
@@ -29,19 +30,16 @@ export class App {
   private stage: PIXI.Container
   private ticker: PIXI.Ticker
 
-  private width: number
-
   private resourceManager: ResourceManager
   private soundManager: SoundManager
   private requestManager: RequestManager
-
-  private screen: any
+  private screenManager: ScreenManager
 
   constructor() {
     App.instance = this
   }
 
-  private initStorage(): Promise<void> {
+  private initStorage(): void {
     const urlParams = new URLSearchParams(window.location.search)
     const bossId = urlParams.has('bossId') ? urlParams.get('bossId') : 12
     const sessionId = urlParams.has('jsessionId') ? urlParams.get('jsessionId') : 'node0y83vqbsk259wy1urugzobjz0323'
@@ -50,8 +48,27 @@ export class App {
       bossId: bossId,
       sessionId: sessionId,
     })
+  }
 
-    return Promise.resolve()
+  private initPIXI(): void {
+    this.canvas = document.getElementById('canvas') as HTMLCanvasElement
+    this.app = new PIXI.Application({
+      backgroundColor: 0x000000,
+      view: this.canvas,
+      antialias: true,
+      resolution: 2,//window.devicePixelRatio,
+      resizeTo: window,
+    })
+
+    this.ticker = this.app.ticker
+    this.stage = this.app.stage
+  }
+
+  private initScreenManager(): void {
+    this.screenManager = new ScreenManager()
+    this.screenManager.on('resize', () => this.onResize())
+
+    this.stage.addChild(this.screenManager)
   }
 
   private async loadResources(config: any): Promise<void> {
@@ -89,22 +106,15 @@ export class App {
   public async init(props: AppInitOptions = { debugMode: false }): Promise<void> {
     console.log('App::init() -', props)
 
-    await this.initStorage()
+    this.initStorage()
+
     await this.loadResources(ResourcesConfig)
-    await this.connectToServer('wss://ohota.mobi/ws/fightBoss;jsessionid=' + State.get('sessionId') + '?bossId=' + State.get('bossId'))
+    //await this.connectToServer('wss://ohota.mobi/ws/fightBoss;jsessionid=' + State.get('sessionId') + '?bossId=' + State.get('bossId'))
 
-    this.canvas = document.getElementById('canvas') as HTMLCanvasElement
-    this.app = new PIXI.Application({
-      backgroundColor: 0x000000,
-      view: this.canvas,
-      antialias: true,
-      resolution: 2,//window.devicePixelRatio,
-      resizeTo: window,
-    })
+    this.initPIXI()
+    this.initScreenManager()
 
-    this.ticker = this.app.ticker
-    this.stage = this.app.stage
-
+    /*
     State.set('reward', {
       'cards': [{ 'id': 0, 'level': 1, 'exp': 2 }],
       'items': [{ 'itemId': 0, 'quality': 1, 'level': 2 }],
@@ -181,22 +191,36 @@ export class App {
       'blood': 0,
       'expCards': 2,
     })
+     */
+    //this.showSearchOpponent()
 
-    //this.showMap()
-
+    /*
     if (this.checkReward()) {
       this.showReward()
 
     } else {
       this.showBattle()
     }
+     */
 
+    this.start()
+  }
+
+  private start(): void {
     this.ticker.add((dt) => this.onUpdate(dt))
 
     window.addEventListener('resize', () => this.onResize())
     window.addEventListener('orientationchange', () => this.onResize())
 
     this.initGameEvents()
+
+    this.screenManager.showScreen(DeadWarSearchScreen, [
+      { name: 'Вы', rating: 1400, addRating: 39 },
+      { name: 'Batman', rating: 1400, addRating: 43 },
+      { name: 'Robin', rating: 1400, addRating: -3 },
+      { name: 'Joker', rating: 1400, addRating: -5 },
+      { name: 'Superman', rating: 1400, addRating: -8 },
+    ])
 
     this.onUpdate(1)
     this.onResize()
@@ -205,6 +229,8 @@ export class App {
   private initGameEvents(): void {
     EventBus.on(GameEvent.BattleAttack, async (index: number) => {
       this.requestManager.once('attack', data => {
+        console.log('attack', data)
+
         State.set(data)
         EventBus.emit(GameEvent.BattlePlayerTurnStarting, State)
       })
@@ -217,11 +243,12 @@ export class App {
 
     EventBus.on(GameEvent.BattleEnemyTurnEnding, () => {
       if (this.checkReward()) {
-        this.showReward()
+        //this.showReward()
       }
     })
   }
 
+  /*
   private releaseScreen(): void {
     if (this.screen) {
       this.stage.removeChild(this.screen)
@@ -232,6 +259,13 @@ export class App {
     this.releaseScreen()
 
     this.screen = new MapScreen()
+    this.stage.addChild(this.screen)
+  }
+
+  private async showSearchOpponent(): Promise<void> {
+    this.releaseScreen()
+
+    this.screen = new ArenaScreen()
     this.stage.addChild(this.screen)
   }
 
@@ -276,6 +310,7 @@ export class App {
     this.stage.addChild(this.screen = new BattleRewardScreen(State.get('reward') as BattleRewardState))
     this.onResize()
   }
+   */
 
   private checkReward(): boolean {
     if (State.has('reward')) {
@@ -286,8 +321,8 @@ export class App {
   }
 
   private onUpdate(dt: number): void {
-    if (this.screen) {
-      this.screen.update(dt)
+    if (this.screenManager) {
+      this.screenManager.update(dt)
     }
   }
 
@@ -296,9 +331,9 @@ export class App {
     const height = this.app.renderer.height
     const resolution = this.app.renderer.resolution
 
-    if (this.screen) {
-      this.screen.scale.set(0.5)
-      this.screen.resize(width / resolution, height / resolution, resolution)
+    if (this.screenManager) {
+      this.screenManager.scale.set(0.5)
+      this.screenManager.resize(width / resolution, height / resolution, resolution)
     }
   }
 
@@ -314,7 +349,15 @@ export class App {
     return this.stage
   }
 
-  getTicker(): PIXI.Ticker {
+  public getTicker(): PIXI.Ticker {
     return this.ticker
+  }
+
+  public getWidth(): number {
+    return this.app.renderer.width / this.app.renderer.resolution
+  }
+
+  public getHeight(): number {
+    return this.app.renderer.height / this.app.renderer.resolution
   }
 }

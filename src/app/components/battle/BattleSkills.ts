@@ -13,35 +13,23 @@ export class BattleSkills extends PIXI.Container {
   protected skills: any[]
   protected container: PIXI.Container
 
+  protected useRecharge: boolean
   protected canEnableSkills: boolean
 
   protected onPlayerTurnStartingBind: (state) => void
   protected onBattleEnemyTurnEndingBind: (state) => void
   protected onTurnWaitingBind: (state) => void
 
-  constructor() {
+  constructor(useRecharge: boolean = false) {
     super()
 
     this.skills = []
+
+    this.useRecharge = true//useRecharge
     this.canEnableSkills = true
 
     this.container = new PIXI.Container()
     this.addChild(this.container)
-
-    //this.skills.push(new BattleSkill(1, 1, 1), new BattleSkillCombo([1, 2], 1, 1))
-    //this.skills.push(new BattleSkillSuperCombo([1, 2, 3], 1, 1))
-
-    /*
-    this.addSkill([1], 2, 1, 0)
-    this.addSkill([2], 2, 1, 1)
-    this.addSkill([3], 1, 1, 2)
-
-    setTimeout(() => this.morphSkillsToCombo([0, 1], [1, 2], 2, 1), 200)
-    //setTimeout(() => this.addSkill([2, 3], 2, 1, 0), 2000)
-
-     */
-    //this.rearrangeSkills(true)
-    setTimeout(() => this.initFromState(), 500)
 
     this.onPlayerTurnStartingBind = this.onPlayerTurnStarting.bind(this)
     this.onBattleEnemyTurnEndingBind = this.onBattleEnemyTurnEnding.bind(this)
@@ -50,6 +38,8 @@ export class BattleSkills extends PIXI.Container {
     EventBus.on(GameEvent.BattlePlayerTurnStarting, this.onPlayerTurnStartingBind)
     EventBus.on(GameEvent.BattleEnemyTurnEnding, this.onBattleEnemyTurnEndingBind)
     EventBus.on(GameEvent.BattleTurnWaiting, this.onTurnWaitingBind)
+
+    setTimeout(() => this.initFromState(), 500)
   }
 
   protected onPlayerTurnStarting(state): void {
@@ -90,7 +80,7 @@ export class BattleSkills extends PIXI.Container {
     this.skills = []
 
     const userState = State.get('user')
-    const userDeck = userState.fightDeck//BattleDataUtils.getGroups(userState.fightDeck)
+    const userDeck = userState.fightDeck
 
     for (let i = 0; i < userDeck.length; i++) {
       const groupData = userDeck[i]
@@ -98,36 +88,49 @@ export class BattleSkills extends PIXI.Container {
       const index = this.skills.length
       const x = this.getSkillPosition(index)
 
-      console.log('exist', this.isExistSkill(previousSkills, groupData.id), this.skills)
-
-      this.addSkill([groupData.id], groupData.school, groupData.damage, index, x, this.isExistSkill(previousSkills, groupData.id))
+      this.addSkill([groupData.id], groupData.school, groupData.damage, index, x, this.isExistSkill(previousSkills, groupData.id), this.useRecharge)
     }
 
-    const skillGroups = this.getSkillGroups(this.skills)
-
-    console.log(skillGroups)
+    let skillGroups = this.getSkillGroups(this.skills)
+    let groupIndex = 0
 
     for (const key in skillGroups) {
       const skillGroup = skillGroups[key]
-      console.log(skillGroup)
+
+      console.log(groupIndex)
 
       if (skillGroup.length === 2) {
-        this.morphSkillsToCombo2(
-          [skillGroup[0].index, skillGroup[1].index],
-          [skillGroup[0].skillId, skillGroup[1].skillId],
-          skillGroup[0].schoolId,
-          [skillGroup[0].damage, skillGroup[1].damage],
-          this.isExistSkillGroup(previousSkills, [skillGroup[0].skillId, skillGroup[1].skillId]))
-
+        setTimeout(() => {
+          this.morphSkillsToCombo2(
+            [skillGroup[0].index, skillGroup[1].index],
+            [skillGroup[0].skillId, skillGroup[1].skillId],
+            skillGroup[0].schoolId,
+            [skillGroup[0].damage, skillGroup[1].damage],
+            this.isExistSkillGroup(previousSkills, [skillGroup[0].skillId, skillGroup[1].skillId]))
+        }, this.useRecharge ? (groupIndex === 1 ? 3 : 2) * 2 * 1000 : 0)
 
       } else if (skillGroup.length === 3) {
-        this.morphSkillsToCombo3(
-          [skillGroup[0].index, skillGroup[1].index, skillGroup[2].index],
-          [skillGroup[0].skillId, skillGroup[1].skillId, skillGroup[2].skillId],
-          skillGroup[0].schoolId,
-          [skillGroup[0].damage, skillGroup[1].damage, skillGroup[2].damage],
-          this.isExistSkillGroup(previousSkills, [skillGroup[0].skillId, skillGroup[1].skillId, skillGroup[2].skillId]))
+        if (this.useRecharge) {
+          setTimeout(() => {
+            this.morphSkillsToCombo3(
+              [skillGroup[0].index, skillGroup[1].index, skillGroup[2].index],
+              [skillGroup[0].skillId, skillGroup[1].skillId, skillGroup[2].skillId],
+              skillGroup[0].schoolId,
+              [skillGroup[0].damage, skillGroup[1].damage, skillGroup[2].damage],
+              this.isExistSkillGroup(previousSkills, [skillGroup[0].skillId, skillGroup[1].skillId, skillGroup[2].skillId]))
+          }, 2 * 3 * 1000)
+
+        } else {
+          this.morphSkillsToCombo3(
+            [skillGroup[0].index, skillGroup[1].index, skillGroup[2].index],
+            [skillGroup[0].skillId, skillGroup[1].skillId, skillGroup[2].skillId],
+            skillGroup[0].schoolId,
+            [skillGroup[0].damage, skillGroup[1].damage, skillGroup[2].damage],
+            this.isExistSkillGroup(previousSkills, [skillGroup[0].skillId, skillGroup[1].skillId, skillGroup[2].skillId]))
+        }
       }
+
+      groupIndex++
     }
   }
 
@@ -146,13 +149,9 @@ export class BattleSkills extends PIXI.Container {
     let prevSchool = undefined
     let index = 0
 
-    console.log('skills', skills)
-
     for (let i = 0; i < skills.length; i++) {
       const skill = skills[i]
       const school = skill.schoolId
-
-      console.log(prevSchool, school, index)
 
       if (prevSchool !== school) {
         index++
@@ -167,17 +166,20 @@ export class BattleSkills extends PIXI.Container {
       prevSchool = school
     }
 
-    console.log('result', result)
-
     return result
   }
 
-  public async addSkill(skillIds: number[], schoolId: number, damage: number, index: number, x: number, now: boolean = false): Promise<void> {
+  public async addSkill(skillIds: number[], schoolId: number, damage: number, index: number, x: number, now: boolean = false, useRecharge: boolean = false): Promise<void> {
     return new Promise(resolve => {
       let skill = null
 
       if (skillIds.length === 1) {
         skill = new BattleSkill(skillIds[0], schoolId, damage, index)
+
+        if (useRecharge) {
+          skill.startRecharge()
+          setTimeout(() => skill.animateRecharge(2), 2000 * index)
+        }
 
       } else if (skillIds.length === 2) {
         skill = new BattleSkillCombo(skillIds, schoolId, damage, index, now)
@@ -209,7 +211,7 @@ export class BattleSkills extends PIXI.Container {
 
       } else {
         handleOnComplete()
-        TweenMax.to(skill, 1, { alpha: 1, /*onComplete: () => handleOnComplete()*/ })
+        TweenMax.to(skill, 1, { alpha: 1 /*onComplete: () => handleOnComplete()*/ })
       }
     })
   }
@@ -296,8 +298,6 @@ export class BattleSkills extends PIXI.Container {
   public async removeSkill(index: number): Promise<void> {
     return new Promise(resolve => {
       const skill = this.skills.find(skill => skill.index === index)
-
-      console.log(skill, index)
 
       if (!skill) {
         return resolve()

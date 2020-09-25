@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
 
 import { ResourceManager } from '../../utils/resources/ResourceManager'
-import { BattleUserPhoto } from './BattleUserPhoto'
+import { UserPhoto } from '../common/UserPhoto'
 import { BattleUserName } from './BattleUserName'
 import { BattleHealth, BattleHealthType } from './BattleHealth'
 import { BattleHealthbar } from './BattleHealthbar'
@@ -34,8 +34,8 @@ export class BattleHeader extends PIXI.Container {
   protected userBack: PIXI.Graphics
   protected enemyBack: PIXI.Graphics
 
-  protected userPhoto: BattleUserPhoto
-  protected enemyPhoto: BattleUserPhoto
+  protected userPhoto: UserPhoto
+  protected enemyPhoto: UserPhoto
 
   protected userName: BattleUserName
   protected enemyName: BattleUserName
@@ -82,8 +82,8 @@ export class BattleHeader extends PIXI.Container {
     this.enemyBack = new PIXI.Graphics()
     this.userBack = new PIXI.Graphics()
 
-    this.enemyPhoto = new BattleUserPhoto('boss_photo_' + bossId + '.png')
-    this.userPhoto = new BattleUserPhoto('maneken.png')
+    this.enemyPhoto = new UserPhoto('boss_photo_' + bossId + '.png')
+    this.userPhoto = new UserPhoto('maneken.png')
 
     this.enemyName = new BattleUserName(this.enemyState.name || 'Enemy', 0xe82d2c)
     this.userName = new BattleUserName(this.userState.name || 'User', 0x6085ad)
@@ -101,7 +101,7 @@ export class BattleHeader extends PIXI.Container {
 
     this.containerMask = new PIXI.Graphics()
     this.containerMask.beginFill(0xffffff, 0.5)
-    this.containerMask.drawRect(0, 0, this.back.width, this.back.height)
+    this.containerMask.drawRect(-this.back.width / 2, 0, this.back.width, this.back.height)
     this.containerMask.endFill()
 
     this.containerMask.position.set(0, this.container.y)
@@ -128,7 +128,6 @@ export class BattleHeader extends PIXI.Container {
     this.initEvents()
     this.createWeatherEffect()
   }
-
 
   protected createWeatherEffect(): void {
     if (this.weatherEffect) {
@@ -251,34 +250,37 @@ export class BattleHeader extends PIXI.Container {
   public resize(width: number, height: number, resolution: number): void {
     width = Math.min(width, this.back.width)
 
-    this.back.x = width / 2
+    this.enemy.position.set(0, this.back.height)
 
-    this.enemy.position.set(width / 2, this.back.height)
+    this.userBack.x = -width / 2 + this.userPhoto.width
+    this.userPhoto.x = -width / 2
+
+    this.enemyBack.x = -width / 2 + this.enemyPhoto.width
+    this.enemyPhoto.x = -width / 2
 
     this.enemyBack.clear()
     this.enemyBack.beginFill(0x000000, 0.5)
-    this.enemyBack.drawRect(this.enemyPhoto.width, 0, width - this.enemyPhoto.width, 39)
+    this.enemyBack.drawRect(0, 0, width - this.enemyPhoto.width, 39)
     this.enemyBack.endFill()
 
     this.userBack.clear()
     this.userBack.beginFill(0x000000, 0.5)
-    this.userBack.drawRect(this.userPhoto.width, 0, width - this.userPhoto.width, 39)
+    this.userBack.drawRect(0, 0, width - this.userPhoto.width, 39)
     this.userBack.endFill()
 
-    this.userBack.position.set(0, this.container.y + this.back.height)
+    this.userBack.y = this.container.y + this.back.height
+    this.userPhoto.y = this.userBack.y
 
-    this.userPhoto.position.set(0, this.userBack.y)
+    this.enemyName.position.set(this.enemyBack.x + 15, 22)
+    this.userName.position.set(this.userBack.x + 15, this.userBack.y + 15)
 
-    this.enemyName.position.set(50, 22)
-    this.userName.position.set(50, this.userBack.y + 15)
-
-    this.enemyHealth.position.set(this.enemyBack.width - 69, 22)
-    this.userHealth.position.set(this.userBack.width - 69, this.userBack.y + 15)
+    this.enemyHealth.position.set(this.enemyBack.x + this.enemyBack.width - 69, 22)
+    this.userHealth.position.set(this.userBack.x + this.userBack.width - 69, this.userBack.y + 15)
 
     this.enemyHealthbar.position.set(this.enemyPhoto.x + this.enemyPhoto.width, 0)
-    this.enemyHealthbar.resize(width - (this.enemyPhoto.x + this.enemyPhoto.width) - 1, 6)
+    this.enemyHealthbar.resize(width / 2 - (this.enemyPhoto.x + this.enemyPhoto.width) - 1, 6)
 
     this.userHealthbar.position.set(this.userPhoto.x + this.userPhoto.width, this.userBack.y + this.userBack.height - 8)
-    this.userHealthbar.resize(width - (this.userPhoto.x + this.userPhoto.width) - 1, 8)
+    this.userHealthbar.resize(width / 2 - (this.userPhoto.x + this.userPhoto.width) - 1, 8)
   }
 }

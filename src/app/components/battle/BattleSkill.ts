@@ -1,15 +1,20 @@
 import * as PIXI from 'pixi.js'
+import { TweenMax } from 'gsap'
+
 import { ResourceManager } from '../../utils/resources/ResourceManager'
 
 export const BattleSkillColor = ['#ffac4b', '#B3E246', '#8fecff']
 
 export class BattleSkill extends PIXI.Container {
+  protected skillIconMask: PIXI.Sprite
   protected skillIcon: PIXI.Sprite
 
   protected digContainer: PIXI.Container
   protected digBackIcon: PIXI.Sprite
   protected digSchoolIcon: PIXI.Sprite
   protected digDamageLabel: PIXI.Text
+
+  protected rechargeShape: PIXI.Graphics
 
   public skillId: number
   public schoolId: number
@@ -26,9 +31,11 @@ export class BattleSkill extends PIXI.Container {
     this.damage = damage
     this.index = index
 
+    this.skillIconMask = new PIXI.Sprite(ResourceManager.instance.getTexture('skill_mask.png') || PIXI.Texture.WHITE)
+    this.skillIconMask.anchor.set(0.5)
+
     this.skillIcon = new PIXI.Sprite(ResourceManager.instance.getTexture('skill_' + skillId + '.png') || PIXI.Texture.WHITE)
     this.skillIcon.anchor.set(0.5)
-    //this.skillIcon.position.set(this.skillIcon.width / 2, 0)
 
     this.digContainer = new PIXI.Container()
 
@@ -46,9 +53,14 @@ export class BattleSkill extends PIXI.Container {
     this.digDamageLabel.anchor.set(0, 0.5)
     this.digDamageLabel.position.set(this.digSchoolIcon.width + digOffset, 0)
 
+    this.rechargeShape = new PIXI.Graphics()
+    this.rechargeShape.mask = this.skillIconMask
+
     this.addChild(this.skillIcon)
     this.addChild(this.digBackIcon)
     this.addChild(this.digContainer)
+    this.addChild(this.rechargeShape)
+    this.addChild(this.skillIconMask)
 
     this.digContainer.addChild(this.digSchoolIcon)
     this.digContainer.addChild(this.digDamageLabel)
@@ -57,5 +69,25 @@ export class BattleSkill extends PIXI.Container {
 
     this.digContainer.x = -this.digContainer.width / 2
     this.digContainer.y = this.digBackIcon.y
+  }
+
+  public startRecharge(): void {
+    this.rechargeShape.clear()
+    this.rechargeShape.beginFill(0x000000, 0.75)
+    this.rechargeShape.drawRect(-this.skillIconMask.width / 2, -this.skillIconMask.height / 2, this.skillIconMask.width, this.skillIconMask.height)
+    this.rechargeShape.endFill()
+  }
+
+  public async animateRecharge(time: number): Promise<void> {
+    const tween = TweenMax.to(this, time, {
+      onComplete: () => {
+
+      }, onUpdate: () => {
+        this.rechargeShape.clear()
+        this.rechargeShape.beginFill(0x000000, 0.75)
+        this.rechargeShape.drawRect(-this.skillIconMask.width / 2, -this.skillIconMask.height / 2, this.skillIconMask.width, this.skillIconMask.height * (1 - tween.progress()))
+        this.rechargeShape.endFill()
+      },
+    })
   }
 }

@@ -1,5 +1,6 @@
-import { EventEmitter } from 'eventemitter3'
 import * as PIXI from 'pixi.js'
+
+import { EventEmitter } from 'eventemitter3'
 
 export enum TextureManagerEvent {
   Error = 'TextureManagerEvent.Error',
@@ -63,6 +64,8 @@ export class TextureManager extends EventEmitter {
     if (key in this.loader.resources) {
       return this.loader.resources[key].texture
     }
+
+    console.log(this.loader.resources)
 
     return null
   }

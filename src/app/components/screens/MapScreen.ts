@@ -1,7 +1,8 @@
 import * as PIXI from 'pixi.js'
 import { ResourceManager } from '../../utils/resources/ResourceManager'
-import { MapMenu } from '../map/MapMenu'
 import { Button } from '../common/Button'
+import { MapNavMenu } from '../map/MapNavMenu'
+import { BaseScreen } from './BaseScreen'
 
 export enum MapScreenItemState {
   Opened = 0,
@@ -40,7 +41,7 @@ export class MapScreenItem extends PIXI.Container {
   }
 }
 
-export class MapScreen extends PIXI.Container {
+export class MapScreen extends BaseScreen {
   protected container: PIXI.Container
 
   protected content: PIXI.Container
@@ -62,7 +63,7 @@ export class MapScreen extends PIXI.Container {
   protected chatIcon: PIXI.Sprite
   protected chatSendButton: Button
 
-  protected mapMenu: MapMenu
+  protected navMenu: MapNavMenu
 
   private dragging: boolean
   private draggingGlobal: PIXI.Point
@@ -72,8 +73,8 @@ export class MapScreen extends PIXI.Container {
 
   private contentSize: any
 
-  constructor() {
-    super()
+  public async init(options: any): Promise<void> {
+    await super.init(options)
 
     this.dragging = false
     this.draggingGlobal = new PIXI.Point(0, 0)
@@ -120,7 +121,7 @@ export class MapScreen extends PIXI.Container {
 
     this.chatSendButton = new Button('map_chat_b.png')
 
-    this.mapMenu = new MapMenu()
+    this.navMenu = new MapNavMenu()
 
     this.addChild(this.content)
     this.addChild(this.contentMask)
@@ -141,7 +142,7 @@ export class MapScreen extends PIXI.Container {
     this.container.addChild(this.chatIcon)
     this.container.addChild(this.chatSendButton)
 
-    this.container.addChild(this.mapMenu)
+    this.container.addChild(this.navMenu)
 
     this.initItems()
 
@@ -312,7 +313,7 @@ export class MapScreen extends PIXI.Container {
   }
 
   update(dt: number): void {
-    this.mapMenu.position.set(-this.mapMenu.width / 2, this.chatSendButton.y + 65)
+    this.navMenu.position.set(-this.navMenu.width / 2, this.chatSendButton.y + 65)
 
     if (this.content) {
       this.content.y += (this.target.y - this.content.y) / this.maxSpeed
